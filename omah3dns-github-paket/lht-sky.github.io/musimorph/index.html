@@ -1,0 +1,348 @@
+<!doctype html><html><head><meta charset=utf-8><meta name="description" content="Konsep 3D Musimorph 9-chamber transducer array oleh Lukman, omah3dns."><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<a href="../" style="position:fixed;z-index:50;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);font:500 12px/1 'IBM Plex Mono',ui-monospace,monospace;padding:8px 10px;border-radius:3px;background:rgba(20,26,28,.82);color:#fff;text-decoration:none">&larr; omah3dns</a>
+<title>Musimorph 9-Chamber Array</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: drawing-sheet feel. 3D stage left (top on phone), spec rail right with chamber map, toggles and data. */
+:root{
+  --bg:#e9ecea; --paper:#f6f7f5; --ink:#1b2220; --muted:#5d6864; --line:#c9d0cc;
+  --stage:#dfe4e1; --accent:#2c56c9; --accent-ink:#ffffff; --warn:#a2560f;
+  --body3d:#d8dbd6; --edge3d:#7d8783;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141917; --paper:#1b211f; --ink:#e3e8e5; --muted:#97a39e; --line:#2f3936;
+  --stage:#101413; --accent:#7d9cff; --accent-ink:#0d1330; --warn:#e3a25c;
+  --body3d:#b9beb8; --edge3d:#4a5551; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141917; --paper:#1b211f; --ink:#e3e8e5; --muted:#97a39e; --line:#2f3936;
+  --stage:#101413; --accent:#7d9cff; --accent-ink:#0d1330; --warn:#e3a25c;
+  --body3d:#b9beb8; --edge3d:#4a5551; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:18px 32px;display:grid;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 20px;border-bottom:1px solid var(--line);padding-bottom:10px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,3.4vw,32px);letter-spacing:.01em;margin:0;text-wrap:balance}
+.meta{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:6px;height:min(72vh,680px);min-height:380px;overflow:hidden;touch-action:none}
+.stage canvas{display:block;width:100%;height:100%}
+.hud{position:absolute;left:12px;top:10px;font-family:var(--f-mono);font-size:12px;color:var(--muted);pointer-events:none}
+.hud b{color:var(--ink);font-weight:500}
+.hint{position:absolute;right:12px;bottom:10px;font-family:var(--f-mono);font-size:11px;color:var(--muted);pointer-events:none}
+.rail{display:grid;gap:14px;min-width:0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;display:grid;gap:10px;min-width:0}
+h2{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.09em;text-transform:uppercase;margin:0;color:var(--muted)}
+.map{display:grid;grid-template-columns:20px repeat(3,1fr);gap:6px;align-items:center}
+.map .ax{font-family:var(--f-mono);font-size:11px;color:var(--muted);text-align:center}
+.cell{font-family:var(--f-mono);font-size:13px;padding:10px 0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;cursor:pointer}
+.cell:hover{border-color:var(--accent)}
+.cell[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.cell:focus-visible,.seg button:focus-visible,.chk:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.selinfo{font-size:13px;color:var(--muted);min-height:2.6em}
+.selinfo b{color:var(--ink);font-weight:500}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.lbl{font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg button{font-family:var(--f-mono);font-size:12px;border:0;background:transparent;color:var(--ink);padding:6px 10px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.chk{display:inline-flex;gap:8px;align-items:center;font-size:13px;cursor:pointer}
+.chk input{accent-color:var(--accent);width:16px;height:16px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:0;font-size:13px}
+dt{color:var(--muted)}
+dd{margin:0;font-family:var(--f-mono);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:13px}
+.q li::marker{color:var(--warn)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Musimorph 9-Chamber Transducer Array</h1>
+    <span class="meta">Concept R4 · 3 × 3 × 1 chambers · 216 holder positions · units mm</span>
+  </header>
+
+  <div class="grid">
+    <div class="stage" id="stage">
+      <div class="hud" id="hud">Chamber <b>—</b></div>
+      <div class="hint">drag to orbit · pinch / scroll to zoom · tap a chamber</div>
+    </div>
+
+    <div class="rail">
+      <section class="card">
+        <h2>Chamber map · front view</h2>
+        <div class="map" id="map"></div>
+        <div class="selinfo" id="selinfo">Tap a chamber to highlight its 24 holders (front, back, left, right, top, bottom).</div>
+      </section>
+
+      <section class="card">
+        <h2>View</h2>
+        <div class="row"><span class="lbl">Front plate</span>
+          <div class="seg" id="segFront">
+            <button type="button" id="f-solid" data-v="solid">Solid</button>
+            <button type="button" id="f-ghost" data-v="ghost" aria-pressed="true">Ghost</button>
+            <button type="button" id="f-off" data-v="off">Off</button>
+          </div></div>
+        <div class="row"><span class="lbl">Rear cover</span>
+          <div class="seg" id="segBack">
+            <button type="button" id="b-shut" data-v="shut" aria-pressed="true">Fitted</button>
+            <button type="button" id="b-open" data-v="open">Exploded</button>
+          </div></div>
+        <div class="row">
+          <label class="chk"><input type="checkbox" id="optTd" checked> Transducers</label>
+          <label class="chk"><input type="checkbox" id="optSpin"> Auto-rotate</label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Key dimensions</h2>
+        <dl>
+          <dt>Chambers</dt><dd>9 (3 W × 3 H × 1 D)</dd>
+          <dt>Holder positions</dt><dd>216 (24 / chamber)</dd>
+          <dt>Body envelope</dt><dd>210 × 210 × 70</dd>
+          <dt>Overall incl. plinth</dt><dd>240 × 110 × 270</dd>
+          <dt>Chamber cavity</dt><dd>60 × 60 × 60</dd>
+          <dt>Chamber pitch</dt><dd>70</dd>
+          <dt>Outer wall / partition</dt><dd>5 / 10</dd>
+          <dt>Holder grid / face</dt><dd>2 × 2, pitch 30</dd>
+          <dt>Bore / stop lip</dt><dd>Ø16.3 / ID 14</dd>
+          <dt>Leg clearance</dt><dd>25</dd>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>Build concept</h2>
+        <ul>
+          <li>One monolithic body: outer shell plus two vertical and two horizontal partitions form the 9 chambers.</li>
+          <li>Outer-face holders load from outside, as on the v2 cube.</li>
+          <li>Partition holders are back-to-back; they load from the rear before the screwed rear cover (with its own 36 holders) closes the chambers.</li>
+          <li>Plinth carries the "musimorph" logo and houses the driver boards; bottom-row cables drop through a slot in its top.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>To confirm with client</h2>
+        <ul class="q">
+          <li>Shared partitions: one transducer per opening serving both chambers, or two back-to-back? Two typical 12 mm bodies need the partition to grow from 10 to about 26 mm.</li>
+          <li>Real transducer size and pitch (Ø16 / 40 kHz assumed).</li>
+          <li>Print size: 210 mm body fits a 220 mm bed; a smaller printer means splitting into 3 column modules.</li>
+          <li>Official logo SVG (placeholder lettering shown).</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const stage=document.getElementById('stage');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(32,1,1,5000);
+camera.position.set(420,330,560);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.target.set(0,140,0);controls.enableDamping=true;controls.minDistance=200;controls.maxDistance=1600;
+controls.update();
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x707a76,0.75));
+const sun=new THREE.DirectionalLight(0xffffff,0.75);sun.position.set(300,500,400);scene.add(sun);
+const fill=new THREE.DirectionalLight(0xffffff,0.25);fill.position.set(-400,200,-300);scene.add(fill);
+
+/* materials */
+const M={
+  body:new THREE.MeshStandardMaterial({color:0xd8dbd6,roughness:.72,metalness:0}),
+  front:new THREE.MeshStandardMaterial({color:0xd8dbd6,roughness:.72,transparent:true,opacity:.18,depthWrite:false}),
+  bore:new THREE.MeshStandardMaterial({color:0x2a302e,roughness:1,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2}),
+  boreFront:new THREE.MeshStandardMaterial({color:0x2a302e,roughness:1,side:THREE.DoubleSide,transparent:true,opacity:.25,polygonOffset:true,polygonOffsetFactor:-2}),
+  can:new THREE.MeshStandardMaterial({color:0xc6cace,roughness:.35,metalness:.8}),
+  face:new THREE.MeshStandardMaterial({color:0x3b4147,roughness:.8}),
+  sel:new THREE.MeshStandardMaterial({color:0x2c56c9,roughness:.5,emissive:0x2c56c9,emissiveIntensity:.35,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-3}),
+  plinth:new THREE.MeshStandardMaterial({color:0x3a4441,roughness:.6}),
+  leg:new THREE.MeshStandardMaterial({color:0xbfc4bf,roughness:.7}),
+  edge:new THREE.LineBasicMaterial({color:0x7d8783}),
+  edgeFront:new THREE.LineBasicMaterial({color:0x7d8783,transparent:true,opacity:.5}),
+  pick:new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),
+  selBox:new THREE.LineBasicMaterial({color:0x2c56c9})
+};
+
+const root=new THREE.Group();scene.add(root);
+const body=new THREE.Group();body.position.y=60;root.add(body);
+const core=new THREE.Group(),frontG=new THREE.Group(),backG=new THREE.Group();
+body.add(core,frontG,backG);
+
+function plate(g,w,h,d,x,y,z,mat,emat){
+  const geo=new THREE.BoxGeometry(w,h,d);
+  const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);g.add(m);
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(geo),emat||M.edge);e.position.copy(m.position);g.add(e);
+  return m;
+}
+/* shell: x -105..105, y 0..210, z -35..35 */
+plate(frontG,210,210,5,0,105,32.5,M.front,M.edgeFront);
+plate(backG,210,210,5,0,105,-32.5,M.body);
+plate(core,5,210,60,-102.5,105,0,M.body);
+plate(core,5,210,60,102.5,105,0,M.body);
+plate(core,200,5,60,0,2.5,0,M.body);
+plate(core,200,5,60,0,207.5,0,M.body);
+[-35,35].forEach(x=>plate(core,10,200,60,x,105,0,M.body));       // vertical partitions
+[70,140].forEach(y=>{ [-70,0,70].forEach(x=>plate(core,60,10,60,x,y,0,M.body)); }); // horizontal partitions
+/* rear cover screws */
+[[-100,5],[100,5],[-100,205],[100,205],[0,5],[0,205],[-100,105],[100,105]].forEach(([x,y])=>{
+  const s=new THREE.Mesh(new THREE.CylinderGeometry(3,3,1.2,16),M.can);s.rotation.x=Math.PI/2;s.position.set(x,y,-35.6);backG.add(s);
+});
+
+/* holders */
+const discGeo=new THREE.CircleGeometry(8.15,28);
+const canGeo=new THREE.CylinderGeometry(8,8,12,24,1,true);
+const faceGeo=new THREE.CircleGeometry(8,24);
+const capGeo=new THREE.CircleGeometry(8,24);
+const Y=new THREE.Vector3(0,1,0);
+const chambers={};const transducers=[];
+
+function addHolder(id,grp,p,n,outer,frontPlate){
+  const ch=chambers[id];
+  const d=new THREE.Mesh(discGeo,frontPlate?M.boreFront:M.bore);
+  d.position.copy(p).addScaledVector(n,.12);d.lookAt(d.position.clone().add(n));grp.add(d);
+  ch.bores.push({m:d,base:d.material});
+  if(outer){
+    const o=new THREE.Mesh(discGeo,frontPlate?M.boreFront:M.bore);
+    o.position.copy(p).addScaledVector(n,-5.12);o.lookAt(o.position.clone().sub(n));grp.add(o);
+  }
+  const t=new THREE.Group();
+  const c=new THREE.Mesh(canGeo,M.can);c.quaternion.setFromUnitVectors(Y,n);c.position.copy(p).addScaledVector(n,-5.6);t.add(c);
+  const f=new THREE.Mesh(faceGeo,M.face);f.position.copy(p).addScaledVector(n,.3);f.lookAt(f.position.clone().add(n));t.add(f);
+  const b=new THREE.Mesh(capGeo,M.can);b.position.copy(p).addScaledVector(n,-11.6);b.lookAt(b.position.clone().sub(n));t.add(b);
+  grp.add(t);transducers.push(t);ch.faces.push({m:f,base:M.face});
+}
+
+const cols=['A','B','C'];
+for(let ci=0;ci<3;ci++)for(let ri=0;ri<3;ri++){
+  const id=cols[ci]+(ri+1),cx=(ci-1)*70,cy=35+ri*70;
+  chambers[id]={bores:[],faces:[],cx,cy};
+  const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+  for(const a of[-15,15])for(const b of[-15,15]){
+    addHolder(id,frontG,V(cx+a,cy+b,30),V(0,0,-1),true,true);
+    addHolder(id,backG,V(cx+a,cy+b,-30),V(0,0,1),true,false);
+    addHolder(id,core,V(cx-30,cy+a,b),V(1,0,0),ci===0,false);
+    addHolder(id,core,V(cx+30,cy+a,b),V(-1,0,0),ci===2,false);
+    addHolder(id,core,V(cx+a,cy-30,b),V(0,1,0),ri===0,false);
+    addHolder(id,core,V(cx+a,cy+30,b),V(0,-1,0),ri===2,false);
+  }
+  const pk=new THREE.Mesh(new THREE.BoxGeometry(60,60,60),M.pick);pk.position.set(cx,cy,0);pk.userData.id=id;core.add(pk);
+  chambers[id].pick=pk;
+}
+const selBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(58,58,58)),M.selBox);
+selBox.visible=false;body.add(selBox);
+
+/* stand: legs + plinth */
+[[-95,-25],[95,-25],[-95,25],[95,25]].forEach(([x,z])=>{
+  const l=new THREE.Mesh(new THREE.BoxGeometry(12,25,12),M.leg);l.position.set(x,47.5,z);root.add(l);
+});
+const plGeo=new THREE.BoxGeometry(240,35,110);
+const pl=new THREE.Mesh(plGeo,M.plinth);pl.position.y=17.5;root.add(pl);
+const slot=new THREE.Mesh(new THREE.PlaneGeometry(130,8),M.bore);slot.rotation.x=-Math.PI/2;slot.position.set(0,35.1,0);root.add(slot);
+
+function logoTex(){
+  const c=document.createElement('canvas');c.width=1024;c.height=150;const g=c.getContext('2d');
+  g.fillStyle='#3a4441';g.fillRect(0,0,1024,150);
+  g.fillStyle='#d9ded9';g.font='600 104px "Barlow Semi Condensed", Arial, sans-serif';g.textAlign='center';g.textBaseline='middle';
+  g.fillText('musimorph',512,80);
+  g.fillStyle='#9aa49f';g.fillRect(150,132,724,3);
+  const t=new THREE.CanvasTexture(c);t.anisotropy=8;return t;
+}
+let logoMat=new THREE.MeshStandardMaterial({map:logoTex(),roughness:.6});
+const logo=new THREE.Mesh(new THREE.PlaneGeometry(200,29.3),logoMat);logo.position.set(0,17.5,55.1);root.add(logo);
+const logoBack=logo.clone();logoBack.position.z=-55.1;logoBack.rotation.y=Math.PI;root.add(logoBack);
+if(document.fonts&&document.fonts.load){document.fonts.load('600 104px "Barlow Semi Condensed"').then(()=>{logoMat.map=logoTex();logoMat.needsUpdate=true;}).catch(()=>{});}
+
+/* theme */
+function applyTheme(){
+  scene.background=new THREE.Color(css('--stage')||'#dfe4e1');
+  const b=new THREE.Color(css('--body3d')||'#d8dbd6');M.body.color.copy(b);M.front.color.copy(b);
+  const e=new THREE.Color(css('--edge3d')||'#7d8783');M.edge.color.copy(e);M.edgeFront.color.copy(e);
+  const a=new THREE.Color(css('--accent')||'#2c56c9');M.sel.color.copy(a);M.sel.emissive.copy(a);M.selBox.color.copy(a);
+}
+applyTheme();
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);}catch(e){}
+new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* state + UI */
+const S={front:'ghost',back:'shut',td:true,spin:false,sel:null};
+const hud=document.getElementById('hud'),selinfo=document.getElementById('selinfo');
+const map=document.getElementById('map');
+for(let ri=2;ri>=0;ri--){
+  const ax=document.createElement('span');ax.className='ax';ax.textContent=ri+1;map.appendChild(ax);
+  for(let ci=0;ci<3;ci++){const id=cols[ci]+(ri+1);const b=document.createElement('button');
+    b.type='button';b.className='cell';b.id='cell-'+id;b.textContent=id;b.setAttribute('aria-pressed','false');
+    b.onclick=()=>select(S.sel===id?null:id);map.appendChild(b);}
+}
+map.appendChild(Object.assign(document.createElement('span'),{className:'ax'}));
+cols.forEach(c=>map.appendChild(Object.assign(document.createElement('span'),{className:'ax',textContent:c})));
+
+function select(id){
+  if(S.sel){chambers[S.sel].bores.forEach(o=>o.m.material=o.base);chambers[S.sel].faces.forEach(o=>o.m.material=o.base);
+    document.getElementById('cell-'+S.sel).setAttribute('aria-pressed','false');}
+  S.sel=id;
+  if(id){const ch=chambers[id];ch.bores.forEach(o=>o.m.material=M.sel);ch.faces.forEach(o=>o.m.material=M.sel);
+    selBox.position.set(ch.cx,ch.cy,0);selBox.visible=true;document.getElementById('cell-'+id).setAttribute('aria-pressed','true');
+    const ci=cols.indexOf(id[0]),ri=+id[1]-1;
+    const shared=[ci>0,ci<2,ri>0,ri<2].filter(Boolean).length;
+    hud.innerHTML='Chamber <b>'+id+'</b> · 24 holders';
+    selinfo.innerHTML='<b>'+id+'</b>: 24 holders. '+(6-shared)*4+' on outer walls, '+shared*4+' on shared partitions with neighbouring chambers.';
+  }else{selBox.visible=false;hud.innerHTML='Chamber <b>—</b>';
+    selinfo.textContent='Tap a chamber to highlight its 24 holders (front, back, left, right, top, bottom).';}
+}
+
+function seg(id,key,fn){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
+  S[key]=b.dataset.v;document.querySelectorAll('#'+id+' button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));fn();});}
+function applyFront(){
+  frontG.visible=S.front!=='off';
+  const ghost=S.front==='ghost';
+  M.front.opacity=ghost?.18:1;M.front.depthWrite=!ghost;M.front.transparent=ghost;
+  M.boreFront.opacity=ghost?.25:1;M.boreFront.transparent=ghost;
+  M.edgeFront.opacity=ghost?.5:1;
+  M.front.needsUpdate=M.boreFront.needsUpdate=true;
+}
+seg('segFront','front',applyFront);
+seg('segBack','back',()=>{});
+document.getElementById('optTd').onchange=e=>{S.td=e.target.checked;transducers.forEach(t=>t.visible=S.td);};
+document.getElementById('optSpin').onchange=e=>{S.spin=e.target.checked;controls.autoRotate=S.spin;};
+controls.autoRotateSpeed=1.2;
+
+/* picking */
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
+renderer.domElement.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];});
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)return;
+  const r=renderer.domElement.getBoundingClientRect();
+  ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(ptr,camera);
+  const hit=ray.intersectObjects(Object.values(chambers).map(c=>c.pick))[0];
+  if(hit)select(hit.object.userData.id===S.sel?null:hit.object.userData.id);
+});
+
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
+  camera.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(stage);resize();
+if(stage.clientWidth<520){camera.position.set(560,420,760);controls.update();}
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function loop(){
+  const tgt=S.back==='open'?-80:0;
+  backG.position.z+= reduce?(tgt-backG.position.z):(tgt-backG.position.z)*.12;
+  controls.update();renderer.render(scene,camera);requestAnimationFrame(loop);
+}
+applyFront();select('B2');loop();
+})();
+</script>
+
+</body></html>

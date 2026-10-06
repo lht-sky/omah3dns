@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>omah3dns · Lukman</title>
+<meta name="description" content="omah3dns, rumah karya Lukman: cetak 3D dan spare part, desain mesin dan CAD, elektronik dan otomasi, serta kelas teknik vokasi.">
+<meta property="og:title" content="omah3dns · Lukman">
+<meta property="og:description" content="Dari spare part cetak 3D sampai desain mesin. Rumah untuk semua karya teknik Lukman.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one calm reading column, project sheets set like engineering drawings, title block as the closing signature */
+:root{
+  --bg:#F2F3EF;        /* kertas gambar, sedikit hijau */
+  --surface:#FAFBF8;
+  --ink:#1C2226;
+  --muted:#5D686C;
+  --line:#C8CEC9;
+  --accent:#2E6B5E;    /* hijau cat mesin */
+  --brass:#9A7428;
+  --font-display:"Newsreader", Georgia, "Times New Roman", serif;
+  --font-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161A1C;--surface:#1D2326;--ink:#E7EAE6;--muted:#9AA5A4;--line:#33403F;--accent:#7FC0AE;--brass:#D2AE62;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#161A1C;--surface:#1D2326;--ink:#E7EAE6;--muted:#9AA5A4;--line:#33403F;--accent:#7FC0AE;--brass:#D2AE62;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.65 var(--font-body);padding-inline:20px;padding-block:0}
+.wrap{max-width:1040px;margin:0 auto}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;text-wrap:balance;margin:0;line-height:1.15}
+p{margin:0}
+.mono{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.04em;color:var(--muted)}
+.label{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.prose{max-width:62ch;display:grid;gap:1em}
+section{padding-block:72px;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:10px;margin-bottom:36px}
+.sec-head h2{font-size:clamp(1.8rem,3.4vw,2.5rem)}
+
+/* hero */
+.hero{padding-block:72px 64px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:48px;align-items:end}
+.hero h1{font-size:clamp(2.6rem,6.4vw,4.6rem);letter-spacing:-.01em}
+.hero h1 em{color:var(--accent)}
+.hero .lead{font-size:1.12rem;margin-top:24px;max-width:56ch}
+.facts{display:grid;gap:0;border-top:1px solid var(--ink)}
+.facts div{display:grid;grid-template-columns:7.5rem 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.facts dt{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.facts dd{margin:0}
+
+/* career */
+.path{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border-top:2px solid var(--ink)}
+.path li{padding:14px 12px 0 0;position:relative}
+.path li::before{content:"";position:absolute;top:-7px;left:0;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--ink)}
+.path li:last-child::before{background:var(--accent);border-color:var(--accent)}
+.path .n{font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+.path .t{font-weight:500;font-size:.95rem;line-height:1.35;margin-top:4px}
+.career-notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:44px}
+.career-notes h3{font-size:1.3rem;margin-bottom:8px}
+.career-notes p{color:var(--muted);font-size:.95rem}
+
+/* project sheets */
+.sheet{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:0;border:1px solid var(--ink);background:var(--surface);margin-bottom:40px}
+.sheet .draw{border-right:1px solid var(--ink);padding:24px;display:flex;align-items:center;justify-content:center;min-height:360px;position:relative;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:20px 20px;background-position:-1px -1px}
+.sheet .draw::after{content:"";position:absolute;inset:0;background:var(--surface);opacity:.72;pointer-events:none}
+.sheet .draw svg{position:relative;z-index:1;width:100%;height:auto;max-height:440px}
+.sheet .body{padding:32px;display:grid;gap:18px;align-content:start;min-width:0}
+.sheet h3{font-size:clamp(1.6rem,2.8vw,2.1rem)}
+.sheet .meta{display:flex;flex-wrap:wrap;gap:6px 18px}
+.revs{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.revs li{display:grid;grid-template-columns:4.2rem 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.93rem}
+.revs .r{font-family:var(--font-mono);font-size:.75rem;color:var(--muted);padding-top:2px}
+.revs .ok{color:var(--accent);font-weight:600}
+.chip{display:inline-block;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid currentColor;padding:1px 7px;margin-left:6px;vertical-align:1px}
+.chip.ok{color:var(--accent)} .chip.wip{color:var(--brass)}
+.links{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.92rem}
+.titlestrip{grid-column:1/-1;border-top:1px solid var(--ink);display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.titlestrip div{padding:8px 14px;border-right:1px solid var(--line);font-family:var(--font-mono);font-size:.7rem;color:var(--muted);min-width:0}
+.titlestrip div:last-child{border-right:0}
+.titlestrip b{display:block;color:var(--ink);font-weight:500;font-size:.78rem;overflow-wrap:anywhere}
+
+/* svg drawing styles */
+.ln{stroke:var(--ink);fill:none;stroke-width:1.4}
+.ln-thin{stroke:var(--muted);fill:none;stroke-width:.8}
+.ln-acc{stroke:var(--accent);fill:none;stroke-width:1.6}
+.fill-acc{fill:var(--accent)}
+.fill-bg{fill:var(--surface)}
+.dim{stroke:var(--brass);fill:none;stroke-width:.8}
+.svgt{font-family:var(--font-mono);font-size:8px;fill:var(--muted)}
+.svgt-b{font-family:var(--font-mono);font-size:8px;fill:var(--brass)}
+.svgt-logo{font-family:var(--font-body);font-weight:600;font-size:8px;fill:var(--ink);letter-spacing:.5px}
+
+/* small works */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--ink);border-left:1px solid var(--line)}
+.work{padding:24px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;gap:10px;align-content:start;min-width:0}
+.work h3{font-size:1.28rem}
+.work p{font-size:.94rem;color:var(--muted)}
+.work .spec{font-family:var(--font-mono);font-size:.72rem;color:var(--ink);line-height:1.6}
+
+/* method */
+.steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px}
+.steps li{display:grid;gap:8px;align-content:start}
+.steps .n{font-family:var(--font-display);font-style:italic;font-size:2.4rem;color:var(--accent);line-height:1}
+.steps h3{font-size:1.2rem}
+.steps p{font-size:.94rem;color:var(--muted)}
+
+/* teaching */
+.teach{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px}
+.subjects{list-style:none;margin:0;padding:0;columns:1}
+.subjects li{padding:9px 0;border-bottom:1px solid var(--line);font-size:.95rem;display:flex;justify-content:space-between;gap:12px}
+.subjects li span:last-child{font-family:var(--font-mono);font-size:.72rem;color:var(--muted);white-space:nowrap;padding-top:3px}
+
+blockquote{margin:0;font-family:var(--font-display);font-style:italic;font-size:clamp(1.4rem,2.6vw,1.9rem);line-height:1.35;max-width:30ch;text-wrap:balance}
+
+/* closing title block */
+.tb{margin-block:16px 64px;border:2px solid var(--ink);display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));background:var(--surface)}
+.tb > div{padding:14px 16px;border-right:1px solid var(--ink);display:grid;gap:4px;align-content:start;min-width:0}
+.tb > div:last-child{border-right:0}
+.tb .k{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tb .v{font-size:.95rem}
+.tb .big{font-family:var(--font-display);font-size:1.6rem;line-height:1.2}
+
+@media (max-width:860px){
+  .hero,.teach{grid-template-columns:1fr;gap:36px}
+  .sheet{grid-template-columns:1fr}
+  .sheet .draw{border-right:0;border-bottom:1px solid var(--ink);min-height:0}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .career-notes{grid-template-columns:1fr;gap:24px}
+  .path{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:28px}
+  .tb{grid-template-columns:1fr 1fr}
+  .tb > div:first-child{grid-column:1/-1;border-right:0;border-bottom:1px solid var(--ink)}
+}
+@media (max-width:520px){
+  section{padding-block:52px}
+  .grid,.steps{grid-template-columns:1fr}
+  .path{grid-template-columns:1fr 1fr}
+  .titlestrip{grid-template-columns:1fr 1fr}
+  .titlestrip div:nth-child(2){border-right:0}
+  .sheet .body{padding:22px}
+  .facts div{grid-template-columns:6rem 1fr}
+}
+@media (prefers-reduced-motion:no-preference){
+  .spin{transform-origin:center;transform-box:fill-box;animation:spin 14s linear infinite}
+  .spin-r{transform-origin:center;transform-box:fill-box;animation:spin 40s linear infinite reverse}
+  @keyframes spin{to{transform:rotate(360deg)}}
+}
+/* brand bar */
+.topbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 24px;padding-block:22px 0}
+.brand{font-family:var(--font-mono);font-weight:500;font-size:1.05rem;letter-spacing:.02em;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:10px}
+.brand svg{width:26px;height:26px}
+.brand b{color:var(--accent);font-weight:500}
+.nav{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.9rem}
+.nav a{color:var(--muted);text-decoration:none}
+.nav a:hover{color:var(--ink)}
+/* lines under one roof */
+.roof{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:2px solid var(--ink)}
+.line-item{padding:22px 20px 24px 0;display:grid;gap:10px;align-content:start;min-width:0}
+.line-item + .line-item{padding-left:20px;border-left:1px solid var(--line)}
+.line-item h3{font-size:1.35rem}
+.line-item p{font-size:.94rem;color:var(--muted)}
+.line-item .since{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--brass)}
+@media (max-width:860px){.roof{grid-template-columns:1fr 1fr}.line-item:nth-child(3){padding-left:0;border-left:0}.line-item{border-bottom:1px solid var(--line)}}
+@media (max-width:520px){.roof{grid-template-columns:1fr}.line-item,.line-item + .line-item{padding-left:0;border-left:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="topbar" aria-label="Utama">
+  <a class="brand" href="#">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M3 12 L13 4 L23 12 V23 H3 Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 23 V15 H18 V23" fill="none" stroke="var(--accent)" stroke-width="1.6"/><path d="M8 18 H18 M8 20.5 H18" stroke="var(--accent)" stroke-width="1"/></svg>
+    <span>omah<b>3d</b>ns</span>
+  </a>
+  <div class="nav"><a href="#rumah">Lini</a><a href="#karya">Karya</a><a href="#cara-kerja">Cara kerja</a><a href="#mengajar">Mengajar</a><a href="#kontak">Kontak</a></div>
+</nav>
+
+<header class="hero">
+  <div>
+    <p class="label">omah3dns · rumah karya Lukman</p>
+    <h1 style="margin-top:18px">Saya Lukman. Saya merancang mesin, lalu <em>mengajarkannya</em>.</h1>
+    <p class="lead">Tiga belas tahun saya habiskan di lantai produksi dan meja engineering. Sekarang saya mengajar anak-anak SMK, dan di sela itu tetap menggambar mesin untuk klien. Dua dunia ini saling mengisi: di pabrik saya belajar apa yang benar-benar bisa dibuat, di kelas saya belajar menjelaskannya dengan sederhana.</p>
+    <p class="lead" style="margin-top:14px;color:var(--muted)">Semuanya saya kumpulkan di <b style="color:var(--ink);font-weight:500">omah3dns</b>. Awalnya cuma meja printer 3D untuk mencetak spare part. Sekarang omah3dns jadi rumah untuk semua yang saya kerjakan, dari part kecil sampai mesin utuh.</p>
+  </div>
+  <dl class="facts">
+    <div><dt>Sekarang</dt><dd>Guru Teknik Otomasi Industri, SMKS 2 Triple J</dd></div>
+    <div><dt>Sebelumnya</dt><dd>13 tahun di Astra, Divisi Winteq · PT KMWI (AMMDes, Wintor)</dd></div>
+    <div><dt>Alat</dt><dd>SolidWorks, CadQuery, 3D printing, Excel costing</dd></div>
+    <div><dt>Freelance</dt><dd>Dari ide klien menjadi konsep 3D, lalu CAD siap produksi</dd></div>
+  </dl>
+</header>
+
+<section id="rumah">
+  <div class="sec-head">
+    <p class="label">Di bawah satu atap</p>
+    <h2>omah3dns berawal dari spare part, dan terus bertambah kamarnya</h2>
+    <p class="prose" style="color:var(--muted)">“Omah” artinya rumah. Saya ingin siapa pun yang datang membawa masalah teknik merasa seperti bertamu: duduk dulu, cerita, lalu kita cari jalan keluarnya bersama.</p>
+  </div>
+  <div class="roof">
+    <div class="line-item"><span class="since">Kamar pertama</span><h3>Cetak 3D &amp; spare part</h3><p>Part pengganti yang sudah tidak dijual, bracket, jig, dan prototipe. Diukur, digambar ulang di CAD, lalu dicetak dengan material yang sesuai fungsinya.</p></div>
+    <div class="line-item"><span class="since">Lini desain</span><h3>Desain mesin &amp; CAD</h3><p>Dari ide klien menjadi konsep 3D yang bisa diputar, lalu gambar kerja, STEP, dan STL. Lengkap dengan hitungan biaya yang masuk akal.</p></div>
+    <div class="line-item"><span class="since">Lini kontrol</span><h3>Elektronik &amp; otomasi</h3><p>Panel kontrol, rangkaian relay dan ladder logic, sampai perangkat interaktif berbasis Arduino yang siap dipakai di lapangan.</p></div>
+    <div class="line-item"><span class="since">Lini belajar</span><h3>Kelas &amp; materi vokasi</h3><p>Materi ajar dan modul praktik dari kelas saya di SMK. Dibagikan lewat <a href="https://github.com/lht-sky/guruvokasi">guruvokasi</a>.</p></div>
+  </div>
+</section>
+
+<section id="perjalanan">
+  <div class="sec-head">
+    <p class="label">Perjalanan</p>
+    <h2>Dari lantai produksi sampai kursi manajer</h2>
+  </div>
+  <ol class="path">
+    <li><div class="n">01</div><div class="t">Produksi</div></li>
+    <li><div class="n">02</div><div class="t">Teknisi</div></li>
+    <li><div class="n">03</div><div class="t">Engineering design</div></li>
+    <li><div class="n">04</div><div class="t">Purchasing</div></li>
+    <li><div class="n">05</div><div class="t">Project management officer</div></li>
+    <li><div class="n">06</div><div class="t">Manajer engineering product &amp; produksi</div></li>
+  </ol>
+  <div class="career-notes">
+    <div><h3>Astra · Winteq</h3><p>Tiga belas tahun di perusahaan engineering yang membuat mesin dan lini otomasi. Saya naik pelan-pelan, dan karena itu saya paham rasanya di setiap posisi: memegang kunci di mesin, menggambar, menawar harga ke vendor, sampai mengejar jadwal proyek.</p></div>
+    <div><h3>PT KMWI</h3><p>Ikut membangun produk kendaraan rakyat, AMMDes dan Wintor. Di sini saya belajar bahwa desain yang baik itu yang bisa diproduksi berulang, dirawat di lapangan, dan dibeli orang dengan harga yang masuk akal.</p></div>
+    <div><h3>Ruang kelas</h3><p>Sekarang saya mengajar pneumatik, hidrolik, kontrol, robotik, dan CAD. Pengalaman industri saya bawa ke kelas, supaya murid tahu untuk apa mereka belajar.</p></div>
+  </div>
+</section>
+
+<section id="karya">
+  <div class="sec-head">
+    <p class="label">Karya pilihan</p>
+    <h2>Beberapa pekerjaan yang saya banggakan</h2>
+    <p class="prose" style="color:var(--muted)">Setiap proyek dimulai dari cerita klien. Saya ubah cerita itu jadi gambar 3D yang bisa diputar dan dikomentari, lalu kami perbaiki bersama sampai pas.</p>
+  </div>
+
+  <!-- MUSIMORPH -->
+  <article class="sheet">
+    <div class="draw" aria-hidden="true">
+      <svg viewBox="0 0 220 440">
+        <!-- tower front elevation -->
+        <rect class="ln" x="40" y="20" width="140" height="370"/>
+        <rect class="ln" x="40" y="20" width="10" height="370"/>
+        <rect class="ln" x="170" y="20" width="10" height="370"/>
+        <g class="ln">
+          <line x1="40" y1="34" x2="180" y2="34"/>
+          <line x1="40" y1="101" x2="180" y2="101"/>
+          <line x1="40" y1="168" x2="180" y2="168"/>
+          <line x1="40" y1="235" x2="180" y2="235"/>
+          <line x1="40" y1="302" x2="180" y2="302"/>
+          <line x1="40" y1="370" x2="180" y2="370"/>
+        </g>
+        <text class="svgt-logo" x="110" y="30" text-anchor="middle">musimorph</text>
+        <g class="ln-thin"><line x1="90" y1="34" x2="90" y2="370"/><line x1="130" y1="34" x2="130" y2="370"/></g>
+        <g class="ln-acc"><circle cx="90" cy="51" r="12"/><circle cx="130" cy="51" r="12"/><circle cx="90" cy="84" r="12"/><circle cx="130" cy="84" r="12"/><circle cx="90" cy="118" r="12"/><circle cx="130" cy="118" r="12"/><circle cx="90" cy="151" r="12"/><circle cx="130" cy="151" r="12"/><circle cx="90" cy="185" r="12"/><circle cx="130" cy="185" r="12"/><circle cx="90" cy="218" r="12"/><circle cx="130" cy="218" r="12"/><circle cx="90" cy="252" r="12"/><circle cx="130" cy="252" r="12"/><circle cx="90" cy="285" r="12"/><circle cx="130" cy="285" r="12"/><circle cx="90" cy="319" r="12"/><circle cx="130" cy="319" r="12"/><circle cx="90" cy="352" r="12"/><circle cx="130" cy="352" r="12"/></g>
+        <g class="ln-thin"><circle cx="90" cy="51" r="7"/><circle cx="130" cy="51" r="7"/><circle cx="90" cy="84" r="7"/><circle cx="130" cy="84" r="7"/><circle cx="90" cy="118" r="7"/><circle cx="130" cy="118" r="7"/><circle cx="90" cy="151" r="7"/><circle cx="130" cy="151" r="7"/><circle cx="90" cy="185" r="7"/><circle cx="130" cy="185" r="7"/><circle cx="90" cy="218" r="7"/><circle cx="130" cy="218" r="7"/><circle cx="90" cy="252" r="7"/><circle cx="130" cy="252" r="7"/><circle cx="90" cy="285" r="7"/><circle cx="130" cy="285" r="7"/><circle cx="90" cy="319" r="7"/><circle cx="130" cy="319" r="7"/><circle cx="90" cy="352" r="7"/><circle cx="130" cy="352" r="7"/></g>
+        <!-- base block + slider -->
+        <rect class="ln" x="34" y="390" width="152" height="30"/>
+        <rect class="ln-thin" x="60" y="401" width="100" height="8" rx="4"/>
+        <rect class="fill-acc" x="76" y="398" width="14" height="14" rx="2"/>
+        <!-- dimensions -->
+        <g class="dim"><line x1="90" y1="20" x2="90" y2="10"/><line x1="130" y1="20" x2="130" y2="10"/><line x1="90" y1="12" x2="130" y2="12"/></g>
+        <text class="svgt-b" x="110" y="9" text-anchor="middle">pitch</text>
+        <g class="dim"><line x1="186" y1="101" x2="204" y2="101"/><line x1="186" y1="168" x2="204" y2="168"/><line x1="200" y1="101" x2="200" y2="168"/></g>
+        <text class="svgt-b" x="208" y="134" transform="rotate(90 208 134)" text-anchor="middle">1 bay</text>
+        <text class="svgt" x="14" y="205" transform="rotate(-90 14 205)" text-anchor="middle">5 BAY · 2 KOLOM · 4 SISI</text>
+        <text class="svgt" x="110" y="434" text-anchor="middle">slider pasangan</text>
+      </svg>
+    </div>
+    <div class="body">
+      <p class="label">Klien freelance · Riset ultrasonik</p>
+      <h3>Musimorph, rig transduser cetak 3D <span class="chip ok">Disetujui klien</span></h3>
+      <p>Klien butuh rangka untuk memegang banyak transduser ultrasonik 40 kHz secara presisi, semuanya bisa dicetak 3D. Proyek ini berjalan empat revisi, dan tiap revisi lahir dari obrolan yang makin jelas tentang apa yang sebenarnya ingin klien uji.</p>
+      <ol class="revs">
+        <li><span class="r">Rev 1</span><span>Kubus transduser di tengah meja putar. Cincin berputar di atas BB 6 mm, skala sudut 0–360° terukir di base.</span></li>
+        <li><span class="r">Rev 2</span><span>Kubus 70 mm dengan 24 dudukan di keenam sisi, tiga sisi memakai slider dovetail yang bisa digeser dengan klik detent tanpa baut.</span></li>
+        <li><span class="r ok">Rev 3</span><span><b>Menara rangka terbuka</b>, 4 sisi × 2 kolom × 10 dudukan cincin, total 80 transduser, slider pasangan di dua sisi tegak lurus. Saya modelkan sendiri di CAD, dan desain inilah yang disetujui klien.</span></li>
+        <li><span class="r">Rev 4</span><span>Konsep 9 chamber terintegrasi (3 × 3 × 1), 216 posisi dudukan. Masih tahap konsep.</span></li>
+      </ol>
+      <div class="meta"><span class="mono">Bore Ø16,3 / lip ID14</span><span class="mono">Pitch 30 mm</span><span class="mono">PLA / PETG · 0,2 mm</span><span class="mono">Output: STEP, STL, render</span></div>
+      <div class="links">
+        <a href="musimorph/">Buka konsep 3D Rev 4 (interaktif) →</a>
+      </div>
+    </div>
+    <div class="titlestrip">
+      <div>Material<b>PLA / PETG</b></div>
+      <div>Komponen<b>80 transduser</b></div>
+      <div>Proses<b>3D printing</b></div>
+      <div>Status<b>Selesai, Okt 2026</b></div>
+    </div>
+  </article>
+
+  <!-- GW-2 -->
+  <article class="sheet">
+    <div class="draw" aria-hidden="true">
+      <svg viewBox="-150 -150 300 300">
+        <rect class="ln" x="-118" y="-118" width="236" height="236"/>
+        <text class="svgt" x="-112" y="-106">TAMPAK ATAS · SKALA 1:3</text>
+        <!-- brush orbit -->
+        <circle class="ln-thin" r="66" stroke-dasharray="3 3"/>
+        <!-- gallon -->
+        <g class="spin-r"><circle class="ln" r="47"/><circle class="ln-thin" r="40"/><line class="ln-thin" x1="0" y1="-47" x2="0" y2="-40"/></g>
+        <circle class="ln" r="11"/>
+        <g class="spin"><circle class="fill-acc" r="5"/><line class="ln-acc" x1="-9" y1="0" x2="9" y2="0"/></g>
+        <!-- brushes at 120 deg -->
+        <g>
+          <g transform="translate(0,-66)"><g class="spin"><circle class="ln-acc" r="25"/><circle class="ln-acc" r="9"/><line class="ln-acc" x1="-25" y1="0" x2="25" y2="0"/></g></g>
+          <g transform="translate(57.2,33)"><g class="spin"><circle class="ln-acc" r="25"/><circle class="ln-acc" r="9"/><line class="ln-acc" x1="-25" y1="0" x2="25" y2="0"/></g></g>
+          <g transform="translate(-57.2,33)"><g class="spin"><circle class="ln-acc" r="25"/><circle class="ln-acc" r="9"/><line class="ln-acc" x1="-25" y1="0" x2="25" y2="0"/></g></g>
+        </g>
+        <!-- dimension radius -->
+        <g class="dim"><line x1="0" y1="0" x2="57.2" y2="33"/></g>
+        <text class="svgt-b" x="22" y="26">R190</text>
+        <!-- 120 deg arc -->
+        <path class="dim" d="M 0 -22 A 22 22 0 0 1 19 11"/>
+        <text class="svgt-b" x="14" y="-12">120°</text>
+        <text class="svgt" x="-112" y="104">3 sikat samping Ø145 · CW ±300 rpm</text>
+        <text class="svgt" x="-112" y="114">galon PC 19 L · CCW ±40 rpm · sikat dalam ±450 rpm</text>
+      </svg>
+    </div>
+    <div class="body">
+      <p class="label">Klien freelance · Depot air minum</p>
+      <h3>GW-2, mesin cuci galon top loader <span class="chip wip">Konsep</span></h3>
+      <p>Depot air isi ulang butuh mesin yang membersihkan galon luar dan dalam dalam satu chamber, dengan biaya yang masuk akal. Setelah versi pertama (GW-1), saya buat versi hemat yang dimuat dari atas: galon dimasukkan terbalik, pintu ditutup, tekan start, dan sekitar dua menit kemudian galon sudah bersih.</p>
+      <p>Saya pelajari mesin sikat galon impor yang sudah terbukti di lapangan, lalu menyederhanakannya. Tiga sikat samping sekaligus memusatkan, menggosok, dan memutar galon. Roller penggerak tidak dipakai lagi, jadi cukup dua motor dan satu pompa.</p>
+      <div class="meta"><span class="mono">560 × 600 × 1045 mm</span><span class="mono">SS304 bagian basah</span><span class="mono">220 VAC</span><span class="mono">Siklus ±2 menit</span></div>
+      <div class="links">
+        <a href="gw2/">Buka konsep 3D (interaktif) →</a>
+      </div>
+    </div>
+    <div class="titlestrip">
+      <div>Aktuator<b>2 motor + 1 pompa</b></div>
+      <div>Kontrol<b>PLC mini, interlock pintu</b></div>
+      <div>Target biaya<b>≤ 60–70% harga jual</b></div>
+      <div>Status<b>Rev C, Okt 2026</b></div>
+    </div>
+  </article>
+
+  <div class="grid">
+    <div class="work">
+      <p class="label">Industri</p>
+      <h3>Lini otomasi untuk pabrik kemasan</h3>
+      <p>Pasokan lini otomasi lewat PT Global Inti Sinergi untuk produsen kemasan plastik, dari penawaran sampai kontrak.</p>
+      <p class="spec">Penawaran · kontrak · koordinasi teknis</p>
+    </div>
+    <div class="work">
+      <p class="label">Costing</p>
+      <h3>Estimasi biaya manufaktur</h3>
+      <p>Menghitung biaya part sheet metal dari nesting, jumlah stroke bending, dan waktu las. Saya juga membuat kalkulator biaya produksi dan breakdown sub-assembly dari gambar layout lini palletizing.</p>
+      <p class="spec">SS400 · flat pattern SolidWorks · Excel</p>
+    </div>
+    <div class="work">
+      <p class="label">Pesanan museum</p>
+      <h3>Audio interaktif di depan mading</h3>
+      <p>Pengunjung berdiri di depan materi, ambil headset, dan langsung mendengar penjelasan sesuai topiknya. Dibuat untuk produksi, bukan sekadar prototipe: modul disolder permanen.</p>
+      <p class="spec">Sensor IR · DFPlayer Mini · Arduino Nano</p>
+    </div>
+    <div class="work">
+      <p class="label">Elektronik sederhana</p>
+      <h3>Bel “selamat datang”</h3>
+      <p>Bel yang berbunyi saat pintu dibuka, sengaja tanpa mikrokontroler. Sensor magnet langsung memicu modul suara, cukup baterai 18650 atau adaptor 5 V.</p>
+      <p class="spec">MC38 · DFPlayer · speaker 4 Ω 8 W</p>
+    </div>
+    <div class="work">
+      <p class="label">Proyek pribadi</p>
+      <h3>Mini kart dari sespan Scoopy</h3>
+      <p>Sespan bekas saya ubah jadi kokpit kart bergaya racer klasik, dengan mesin Astrea Grand terbuka di belakang jok.</p>
+      <p class="spec">Rantai + pembalik maju-mundur · ban 8″ · wishbone depan · swing arm 2 shock</p>
+    </div>
+    <div class="work">
+      <p class="label">Kelas robotik</p>
+      <h3>Lengan robot Arduino</h3>
+      <p>Lengan robot 4 sumbu yang dikendalikan dua joystick dan Bluetooth. Saya bangun bersama murid kelas XII sebagai pintu masuk ke robot industri.</p>
+      <p class="spec">meArm · 4 × servo MG90 · HC-05</p>
+    </div>
+  </div>
+</section>
+
+<section id="cara-kerja">
+  <div class="sec-head">
+    <p class="label">Cara saya bekerja</p>
+    <h2>Gambar dulu, ngobrol, baru dipotong</h2>
+  </div>
+  <ol class="steps">
+    <li><span class="n">1</span><h3>Dengarkan ceritanya</h3><p>Saya tanya untuk apa mesin itu, siapa yang memakainya, dan berapa anggarannya. Kebutuhan yang belum jelas saya tulis sebagai asumsi, supaya bisa dikonfirmasi.</p></li>
+    <li><span class="n">2</span><h3>Konsep 3D yang bisa diputar</h3><p>Klien menerima tautan model 3D, bukan gambar diam. Lebih mudah menunjuk bagian yang kurang pas daripada menjelaskannya lewat chat.</p></li>
+    <li><span class="n">3</span><h3>Revisi bersama</h3><p>Musimorph butuh empat revisi sampai ketemu bentuknya. Saya menikmati proses ini, karena tiap revisi membuat kita makin paham masalahnya.</p></li>
+    <li><span class="n">4</span><h3>Siap dibuat</h3><p>Hasil akhirnya file CAD, STEP, dan STL, ditambah hitungan biaya yang jujur. Tujuan saya, desainnya benar-benar bisa diproduksi dan dijual.</p></li>
+  </ol>
+</section>
+
+<section id="mengajar" class="teach">
+  <div class="prose">
+    <p class="label">Mengajar</p>
+    <blockquote>“Murid saya harus tahu mesin itu dibuat untuk siapa, bukan cuma cara merakitnya.”</blockquote>
+    <p>Di SMKS 2 Triple J saya mengajar jurusan Teknik Otomasi Industri, dan juga CAD dengan SolidWorks untuk jurusan Teknik Mesin Industri. Saya menyusun modul ajar Kurikulum Merdeka sendiri, dari asesmen diagnostik sampai pemetaan tujuan pembelajaran.</p>
+    <p>Lab kami sederhana, hanya Arduino, servo, dan komputer. Justru karena itu saya senang mencari cara supaya murid tetap bisa merasakan logika robot industri dengan alat yang ada.</p>
+  </div>
+  <ul class="subjects">
+    <li><span>Sistem Kendali Elektropneumatik &amp; Hidrolik</span><span>Fase F</span></li>
+    <li><span>Sistem Robot Industri</span><span>Kelas XII</span></li>
+    <li><span>Sistem Kontrol Industri</span><span>TOI</span></li>
+    <li><span>Sistem Kontrol Elektronik</span><span>TOI</span></li>
+    <li><span>Sistem Kontrol Elektromagnetik</span><span>TOI</span></li>
+    <li><span>Piranti Sensor &amp; Aktuator Industri</span><span>TOI</span></li>
+    <li><span>Gambar Teknik Mesin (SolidWorks)</span><span>TMI</span></li>
+    <li><span>Prakarya &amp; Kewirausahaan</span><span>TOI</span></li>
+  </ul>
+</section>
+
+<section id="bengkel">
+  <div class="sec-head">
+    <p class="label">Di bengkel rumah</p>
+    <h2>Yang saya kerjakan karena senang</h2>
+  </div>
+  <div class="prose">
+    <p>Di luar pekerjaan, saya suka membuat prototipe: mengonversi mobil dan sepeda menjadi kendaraan listrik, mencetak part dengan printer 3D, dan menggambar ulang diagram wiring industri menjadi ladder logic yang mudah dibaca murid. Kebanyakan berawal dari rasa penasaran “bisa nggak, ya?”, dan biasanya jawabannya bisa, setelah beberapa kali gagal.</p>
+  </div>
+</section>
+
+<div class="tb" id="kontak">
+  <div><span class="k">Mari ngobrol</span><span class="big">Punya ide mesin yang belum ada gambarnya?</span><span class="v" style="color:var(--muted)">Ceritakan saja dulu. Saya senang membantu mengubahnya jadi konsep 3D.</span></div>
+  <div><span class="k">Digambar oleh</span><span class="v">Lukman · omah3dns</span></div>
+  <div><span class="k">Hubungi</span><span class="v"><a href="https://github.com/lht-sky">github.com/lht-sky</a><!-- Tambahkan WhatsApp / email di sini, contoh: <br>WA 08xx-xxxx-xxxx --></span></div>
+  <div><span class="k">Rev · Tanggal</span><span class="v" style="font-family:var(--font-mono);font-size:.85rem">A · 07-10-2026</span></div>
+</div>
+
+</div>
+</body>
+</html>
