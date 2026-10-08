@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio Interaktif Museum · Simulasi 3D | omah3dns</title>
+<meta name="description" content="Simulasi 3D interaktif sistem audio museum: narasi otomatis lewat headphone, dipicu sensor InfraRed. Portofolio omah3dns.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f1828; --panel2:#152036; --line:#22314d;
+    --text:#e6ecf7; --muted:#93a3bf; --faint:#5f6f8c;
+    --accent:#38bdf8; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --ir:#ff4d4d;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:14px}
+  .app{display:grid;grid-template-columns:minmax(0,1fr) 360px;height:100vh}
+  .stage{position:relative;overflow:hidden;min-height:0}
+  .stage canvas{display:block;width:100%;height:100%}
+  .title{position:absolute;left:12px;top:12px;pointer-events:none;max-width:calc(100% - 24px);background:rgba(8,14,26,.72);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+  .title .brand{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  .title h1{margin:4px 0 2px;font-size:20px;font-weight:600;line-height:1.25}
+  .title p{margin:0;color:var(--muted);font-size:12.5px}
+  .toolbar{position:absolute;left:12px;right:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:6px}
+  .btn{appearance:none;border:1px solid var(--line);background:rgba(15,24,40,.88);color:var(--text);
+       padding:7px 11px;border-radius:8px;font:500 12.5px Inter,sans-serif;cursor:pointer;backdrop-filter:blur(4px)}
+  .btn:hover{border-color:#36507d}
+  .btn.on{background:#0c3a52;border-color:var(--accent);color:#d7f3ff}
+  .btn:disabled{opacity:.38;cursor:not-allowed}
+  .btn.big{padding:9px 10px;font-size:13px;width:100%}
+  .labels{position:absolute;inset:0;pointer-events:none}
+  .lbl{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font-size:11.5px;font-weight:500;
+       padding:3px 7px;border-radius:6px;background:rgba(8,14,26,.82);border:1px solid var(--line);color:var(--text)}
+  .lbl::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:10px;background:var(--faint)}
+  .lbl.in{border-color:#1f6a52;color:#c9fbe6}
+  .lbl.below{transform:translate(-50%,12px)}
+  .lbl.below::after{top:auto;bottom:100%}
+  .lbl.hidden{display:none}
+
+  .side{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding:14px 14px 24px}
+  .card{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);padding:12px;margin-bottom:12px}
+  .card h2{margin:0 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .state{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .chip{font:600 13px JetBrains Mono,monospace;padding:5px 10px;border-radius:7px;border:1px solid}
+  .chip.STANDBY{color:#cbd5e1;border-color:#475569;background:#1e293b}
+  .chip.PLAYING{color:#bbf7d0;border-color:#16a34a;background:#0f2e1c}
+  .chip.SELESAI{color:#fde68a;border-color:#b45309;background:#2e2109}
+  .chip.BOOT{color:#bae6fd;border-color:#0369a1;background:#0b2537}
+  .led{width:12px;height:12px;border-radius:50%;background:#1f2937;border:1px solid #374151;flex:none}
+  .led.on{background:var(--ok);box-shadow:0 0 10px var(--ok);border-color:#4ade80}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:7px 0 4px;font-size:12.5px}
+  .row .k{color:var(--muted)}
+  .row .v{font-family:JetBrains Mono,monospace;font-size:12px}
+  .bar{height:6px;background:#0b1322;border-radius:4px;overflow:hidden;border:1px solid #1b2840}
+  .bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .08s linear}
+  .bar.ir>i{background:var(--ir)} .bar.warn>i{background:var(--warn)} .bar.ok>i{background:var(--ok)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .vol{display:flex;align-items:center;gap:8px}
+  .vol .num{font:600 22px JetBrains Mono,monospace;min-width:44px;text-align:center}
+  .vol .bar{flex:1;height:10px}
+  .vol .btn{width:40px;font-size:18px;padding:4px 0}
+  .set{margin:10px 0}
+  .set label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+  .set label b{color:var(--text);font:500 12px JetBrains Mono,monospace}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .chk{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+  .log{background:#060b14;border:1px solid #1b2840;border-radius:8px;height:190px;overflow-y:auto;padding:8px;
+       font:12px/1.5 JetBrains Mono,monospace;color:#b7c4dc}
+  .log .t{color:#4b5d7d}
+  .log .hl{color:#86efac} .log .w{color:#fcd34d}
+  details{font-size:13px;color:var(--muted);line-height:1.55}
+  details summary{cursor:pointer;color:var(--text);font-weight:500}
+  details table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+  details td{border-top:1px solid var(--line);padding:4px 2px;vertical-align:top}
+  details td:first-child{color:var(--text);white-space:nowrap;padding-right:8px}
+  a{color:var(--accent)}
+  .foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:8px}
+  .hint{font-size:11.5px;color:var(--faint);margin-top:6px}
+
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr;height:auto}
+    .stage{height:62vh;min-height:360px}
+    .side{border-left:0;border-top:1px solid var(--line)}
+    .title h1{font-size:16px}
+    .title p{display:none}
+    .lbl{font-size:10.5px;padding:2px 5px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="stage" id="stage">
+    <div class="labels" id="labels"></div>
+    <div class="title">
+      <div class="brand">omah3dns · portofolio</div>
+      <h1>Sistem Audio Interaktif Museum</h1>
+      <p>Simulasi 3D · narasi otomatis lewat headphone, dipicu sensor InfraRed</p>
+    </div>
+    <div class="toolbar">
+      <button class="btn" data-cam="front">Depan</button>
+      <button class="btn" data-cam="side">Samping</button>
+      <button class="btn" data-cam="box">Isi box</button>
+      <button class="btn" id="btnCut">Transparan box</button>
+      <button class="btn on" id="btnLabels">Label</button>
+      <button class="btn on" id="btnDemo">Demo otomatis</button>
+      <button class="btn" id="btnSound">Suara: mati</button>
+    </div>
+  </div>
+
+  <aside class="side">
+    <div class="card">
+      <h2>Status sistem</h2>
+      <div class="state">
+        <span class="chip BOOT" id="chip">BOOT</span>
+        <span class="led" id="led" title="Lampu indikator"></span>
+        <span style="color:var(--muted);font-size:12px">Indikator</span>
+      </div>
+      <div class="row"><span class="k">Sensor InfraRed</span><span class="v" id="vRaw">–</span></div>
+      <div class="row"><span class="k">Konfirmasi hadir</span><span class="v" id="vHadir">–</span></div>
+      <div class="bar ir"><i id="bHadir"></i></div>
+      <div class="row"><span class="k">Hitung mundur pergi</span><span class="v" id="vPergi">–</span></div>
+      <div class="bar warn"><i id="bPergi"></i></div>
+      <div class="row"><span class="k">Posisi narasi</span><span class="v" id="vTrack">0:00 / 0:18</span></div>
+      <div class="bar ok"><i id="bTrack"></i></div>
+    </div>
+
+    <div class="card">
+      <h2>Pengunjung</h2>
+      <div class="grid2">
+        <button class="btn big" id="aCome">Datang &amp; berdiri</button>
+        <button class="btn big" id="aLeave">Pergi</button>
+        <button class="btn big" id="aPass">Lewat saja</button>
+        <button class="btn big" id="aShift">Geser sebentar</button>
+      </div>
+      <div class="hint">Tombol menonaktifkan demo otomatis. "Lewat saja" tidak memicu audio karena pengunjung hanya sebentar terdeteksi.</div>
+    </div>
+
+    <div class="card">
+      <h2>Volume headphone</h2>
+      <div class="vol">
+        <button class="btn" id="vDn" aria-label="Volume turun">−</button>
+        <span class="num" id="vNum">18</span>
+        <div class="bar"><i id="bVol"></i></div>
+        <button class="btn" id="vUp" aria-label="Volume naik">+</button>
+      </div>
+      <div class="row"><span class="k">Level audio</span><span class="v" id="vOut">0</span></div>
+      <div class="bar"><i id="bOut"></i></div>
+    </div>
+
+    <div class="card">
+      <h2>Pengaturan</h2>
+      <div class="set"><label>Waktu konfirmasi hadir <b id="lH">800 ms</b></label><input type="range" id="sH" min="200" max="2000" step="100" value="800"></div>
+      <div class="set"><label>Tunda berhenti setelah pergi <b id="lP">3000 ms</b></label><input type="range" id="sP" min="1000" max="15000" step="500" value="3000"></div>
+      <div class="set"><label>Durasi narasi <b id="lD">18 s</b></label><input type="range" id="sD" min="8" max="60" step="1" value="18"></div>
+      <label class="chk"><input type="checkbox" id="cU"> Ulangi narasi jika pengunjung masih berdiri</label>
+    </div>
+
+    <div class="card">
+      <h2>Log sistem</h2>
+      <div class="log" id="log"></div>
+    </div>
+
+    <div class="card">
+      <details open>
+        <summary>Cara kerja</summary>
+        <ol style="padding-left:18px;margin:8px 0 0">
+          <li>Sensor InfraRed di bawah mading mendeteksi pengunjung yang berdiri di depannya.</li>
+          <li>Pengunjung memakai headphone yang tergantung di samping mading.</li>
+          <li>Narasi sesuai topik diputar otomatis, dengan volume naik perlahan.</li>
+          <li>Orang yang hanya lewat tidak memicu narasi.</li>
+          <li>Setelah pengunjung pergi, narasi berhenti otomatis dan sistem siap untuk pengunjung berikutnya.</li>
+          <li>Volume diatur petugas dari tombol di box kontrol dan tetap tersimpan walau listrik mati.</li>
+        </ol>
+      </details>
+    </div>
+    <div class="foot">© omah3dns · desain &amp; rekayasa: Lukman</div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+
+/* ================= RENDERER / SCENE ================= */
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+stage.insertBefore(renderer.domElement, stage.firstChild);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1220);
+scene.fog = new THREE.Fog(0x0b1220, 7, 16);
+
+const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 60);
+camera.position.set(2.5, 1.8, 3.4);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.set(0.15, 1.2, 0.3);
+controls.enableDamping = true;
+controls.minDistance = 0.12;
+controls.maxDistance = 9;
+controls.maxPolarAngle = Math.PI * 0.495;
+
+scene.add(new THREE.HemisphereLight(0xc7d7ff, 0x1a1c26, 0.55));
+const sun = new THREE.DirectionalLight(0xffffff, 0.6);
+sun.position.set(2.5, 4.5, 4);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, {left:-4, right:4, top:4, bottom:-1, near:0.5, far:12});
+scene.add(sun);
+const spot = new THREE.SpotLight(0xffe0b0, 1.4, 6, 0.55, 0.6, 1.2);
+spot.position.set(0, 3.0, 1.4);
+spot.target.position.set(0, 1.4, 0);
+scene.add(spot, spot.target);
+
+const std = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color, roughness:.7, metalness:0}, o));
+function mesh(geo, mat, pos, parent = scene, shadow = true){
+  const m = new THREE.Mesh(geo, mat);
+  if (pos) m.position.set(pos[0], pos[1], pos[2]);
+  m.castShadow = shadow; m.receiveShadow = true;
+  parent.add(m); return m;
+}
+
+/* ================= ROOM ================= */
+const floor = mesh(new THREE.PlaneGeometry(16, 10), std(0x1b1f27, {roughness:.95}), [0, 0, 3], scene, false);
+floor.rotation.x = -Math.PI / 2;
+mesh(new THREE.PlaneGeometry(16, 4), std(0x343a47, {roughness:.95}), [0, 2, 0], scene, false);
+mesh(new THREE.BoxGeometry(16, 0.08, 0.02), std(0x23262e), [0, 0.04, 0.01], scene, false);
+
+/* Mading texture */
+function madingTexture(){
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 768;
+  const g = c.getContext('2d');
+  g.fillStyle = '#efe5cf'; g.fillRect(0, 0, 1024, 768);
+  g.strokeStyle = '#8a6a43'; g.lineWidth = 10; g.strokeRect(24, 24, 976, 720);
+  g.fillStyle = '#3b2716'; g.font = 'bold 66px Georgia, serif'; g.textAlign = 'left';
+  g.fillText('Sejarah Kerajaan', 70, 120);
+  g.fillStyle = '#7a5b3a'; g.font = 'italic 28px Georgia, serif';
+  g.fillText('Jejak peradaban Nusantara abad ke-8 hingga ke-15', 72, 168);
+  // ilustrasi
+  const x = 70, y = 210, w = 470, h = 420;
+  const sky = g.createLinearGradient(0, y, 0, y + h);
+  sky.addColorStop(0, '#f2c27b'); sky.addColorStop(1, '#c76b3b');
+  g.fillStyle = sky; g.fillRect(x, y, w, h);
+  g.fillStyle = '#4a2a18';
+  const cx = x + w / 2, base = y + h - 40;
+  for (let i = 0; i < 6; i++){
+    const tw = 300 - i * 46, th = 46;
+    g.fillRect(cx - tw / 2, base - (i + 1) * th, tw, th - 6);
+  }
+  g.beginPath(); g.moveTo(cx - 24, base - 6 * 46); g.lineTo(cx, base - 6 * 46 - 70); g.lineTo(cx + 24, base - 6 * 46); g.fill();
+  g.fillStyle = '#2d1a10'; g.fillRect(x, base, w, 40);
+  g.strokeStyle = '#8a6a43'; g.lineWidth = 4; g.strokeRect(x, y, w, h);
+  // teks
+  g.fillStyle = '#b9a688';
+  for (let i = 0; i < 11; i++){
+    const lw = 360 - (i % 3) * 50 - (i === 10 ? 160 : 0);
+    g.fillRect(585, 225 + i * 34, lw, 12);
+  }
+  // badge
+  g.fillStyle = '#123247'; g.fillRect(585, 610, 370, 92);
+  g.fillStyle = '#e6f6ff'; g.font = '600 26px Arial, sans-serif';
+  g.fillText('Pakai headphone,', 610, 650);
+  g.fillStyle = '#9fd8f5'; g.font = '22px Arial, sans-serif';
+  g.fillText('berdiri di depan panel', 610, 684);
+  const t = new THREE.CanvasTexture(c);
+  t.encoding = THREE.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+const PANEL_Y = 1.55;
+mesh(new THREE.BoxGeometry(1.28, 0.98, 0.02), std(0x5b3d27), [0, PANEL_Y, 0.012]);
+const wood = std(0x6b4a30);
+const panel = mesh(new THREE.BoxGeometry(1.2, 0.9, 0.025),
+  [wood, wood, wood, wood, std(0xffffff, {map: madingTexture(), roughness:.85}), wood], [0, PANEL_Y, 0.034]);
+
+/* panel tetangga (konteks) */
+for (const px of [-2.7, 2.7]){
+  mesh(new THREE.BoxGeometry(1.28, 0.98, 0.02), std(0x4a3322), [px, PANEL_Y, 0.012]);
+  mesh(new THREE.BoxGeometry(1.2, 0.9, 0.025), std(0x8f8572, {roughness:.9}), [px, PANEL_Y, 0.034]);
+}
+
+/* ================= CONTROL BOX ================= */
+const box = new THREE.Group(); box.position.set(0, 0.98, 0.036); scene.add(box);
+const shellMat = std(0x1a1e26, {roughness:.55, transparent:true, opacity:1});
+const shell = mesh(new THREE.BoxGeometry(0.18, 0.12, 0.07), shellMat, [0, 0, 0], box);
+// sensor InfraRed menonjol ke depan
+const sensor = mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.075, 20), std(0x555b66, {metalness:.6, roughness:.35}), [0.045, -0.015, 0.05], box);
+sensor.rotation.x = Math.PI / 2;
+const lensMat = new THREE.MeshStandardMaterial({color:0x330a0a, emissive:0xff2020, emissiveIntensity:0.15});
+const lens = mesh(new THREE.CylinderGeometry(0.0075, 0.0075, 0.003, 20), lensMat, [0.045, -0.015, 0.0885], box, false);
+lens.rotation.x = Math.PI / 2;
+// lampu indikator
+const ledMat = new THREE.MeshStandardMaterial({color:0x0b2a14, emissive:0x22ff66, emissiveIntensity:0});
+mesh(new THREE.SphereGeometry(0.0045, 16, 12), ledMat, [-0.062, 0.038, 0.035], box, false);
+// tombol volume
+const btnGeo = new THREE.CylinderGeometry(0.0065, 0.0065, 0.005, 20);
+const btnUp3 = mesh(btnGeo, std(0x9aa3b2), [-0.062, 0.006, 0.037], box, false); btnUp3.rotation.x = Math.PI / 2;
+const btnDn3 = mesh(btnGeo, std(0x9aa3b2), [-0.062, -0.022, 0.037], box, false); btnDn3.rotation.x = Math.PI / 2;
+
+/* isi box (tampil saat transparan) */
+const inside = new THREE.Group(); box.add(inside); inside.visible = false;
+mesh(new THREE.BoxGeometry(0.165, 0.105, 0.0016), std(0x1f6b3d, {roughness:.6}), [0, 0, -0.029], inside, false);
+const nano = mesh(new THREE.BoxGeometry(0.043, 0.018, 0.004), std(0x1d4ed8, {roughness:.5}), [-0.03, 0.022, -0.026], inside, false);
+mesh(new THREE.BoxGeometry(0.008, 0.008, 0.0012), std(0x111111), [-0.028, 0.022, -0.0234], inside, false);
+mesh(new THREE.BoxGeometry(0.009, 0.0045, 0.0035), std(0xc0c6cf, {metalness:.8, roughness:.3}), [-0.0545, 0.022, -0.0255], inside, false);
+const dfp = mesh(new THREE.BoxGeometry(0.021, 0.021, 0.004), std(0xb4232a, {roughness:.5}), [0.038, 0.02, -0.026], inside, false);
+mesh(new THREE.BoxGeometry(0.015, 0.005, 0.002), std(0xc0c6cf, {metalness:.8, roughness:.3}), [0.038, 0.0085, -0.023], inside, false);
+const busyMat = new THREE.MeshStandardMaterial({color:0x330000, emissive:0xff2a2a, emissiveIntensity:0});
+mesh(new THREE.SphereGeometry(0.0013, 10, 8), busyMat, [0.046, 0.028, -0.0235], inside, false);
+const elco = mesh(new THREE.CylinderGeometry(0.0065, 0.0065, 0.016, 20), std(0x1e3a8a), [0.068, -0.012, -0.02], inside, false);
+elco.rotation.x = Math.PI / 2;
+mesh(new THREE.CylinderGeometry(0.0062, 0.0062, 0.0008, 20), std(0xc0c6cf, {metalness:.8}), [0.068, -0.012, -0.0115], inside, false).rotation.x = Math.PI / 2;
+const terms = [];
+for (const tx of [-0.055, -0.02, 0.015]) terms.push(mesh(new THREE.BoxGeometry(0.017, 0.009, 0.01), std(0x2563eb), [tx, -0.04, -0.023], inside, false));
+const res = mesh(new THREE.CylinderGeometry(0.0013, 0.0013, 0.007, 10), std(0xd9c49a), [0.012, 0.022, -0.026], inside, false);
+res.rotation.z = Math.PI / 2;
+
+function tube(points, r, color, parent = scene){
+  const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(p[0], p[1], p[2])));
+  return mesh(new THREE.TubeGeometry(curve, 48, r, 8, false), std(color, {roughness:.6}), null, parent);
+}
+tube([[-0.009, 0.026, -0.0235], [0.006, 0.034, -0.02], [0.027, 0.026, -0.0235]], 0.0008, 0xfacc15, inside);
+tube([[-0.009, 0.018, -0.0235], [0.006, 0.01, -0.02], [0.027, 0.016, -0.0235]], 0.0008, 0xf97316, inside);
+
+/* ================= GANTUNGAN & HEADPHONE ================= */
+const HOOK = new THREE.Vector3(-0.82, 1.42, 0.0);
+mesh(new THREE.BoxGeometry(0.035, 0.05, 0.02), std(0x2a2e36, {metalness:.4, roughness:.4}), [HOOK.x, HOOK.y, 0.01]);
+mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.08, 12), std(0x9aa3b2, {metalness:.7, roughness:.3}), [HOOK.x, HOOK.y, 0.05]).rotation.x = Math.PI / 2;
+mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.025, 12), std(0x9aa3b2, {metalness:.7, roughness:.3}), [HOOK.x, HOOK.y + 0.012, 0.088]);
+
+const hp = new THREE.Group(); scene.add(hp);
+const hpDark = std(0x16181d, {roughness:.45}), hpPad = std(0x2a2d35, {roughness:.9});
+const accentMat = new THREE.MeshStandardMaterial({color:0x0b3a4d, emissive:0x38bdf8, emissiveIntensity:0.1, roughness:.4});
+mesh(new THREE.TorusGeometry(0.13, 0.011, 10, 40, Math.PI), hpDark, [0, 0.005, 0], hp);
+for (const sx of [-1, 1]){
+  const cup = mesh(new THREE.CylinderGeometry(0.048, 0.048, 0.034, 28), hpDark, [sx * 0.138, -0.01, 0], hp);
+  cup.rotation.z = Math.PI / 2;
+  const pad = mesh(new THREE.TorusGeometry(0.038, 0.011, 10, 28), hpPad, [sx * 0.12, -0.01, 0], hp);
+  pad.rotation.y = Math.PI / 2;
+  const ring = mesh(new THREE.TorusGeometry(0.03, 0.004, 8, 28), accentMat, [sx * 0.156, -0.01, 0], hp, false);
+  ring.rotation.y = Math.PI / 2;
+}
+const waves = [];
+for (const sx of [-1, 1]) for (let i = 0; i < 3; i++){
+  const m = new THREE.Mesh(new THREE.RingGeometry(0.05, 0.054, 40),
+    new THREE.MeshBasicMaterial({color:0x38bdf8, transparent:true, opacity:0, side:THREE.DoubleSide, depthWrite:false}));
+  m.position.set(sx * 0.165, -0.01, 0); m.rotation.y = Math.PI / 2; m.userData = {i, sx};
+  hp.add(m); waves.push(m);
+}
+const HP = {t:0, target:0};
+const hookPos = new THREE.Vector3(HOOK.x, HOOK.y + 0.006 - 0.141, 0.075), hookQuat = new THREE.Quaternion();
+const _wp = new THREE.Vector3(), _wq = new THREE.Quaternion();
+function updateHeadphone(dt){
+  const dir = Math.sign(HP.target - HP.t);
+  HP.t = Math.min(1, Math.max(0, HP.t + dir * dt / 0.9));
+  VIS.g.updateMatrixWorld(true);
+  _wp.set(0, 1.735, 0).applyMatrix4(VIS.g.matrixWorld);
+  _wq.copy(VIS.g.quaternion);
+  const e = HP.t < 0.5 ? 2 * HP.t * HP.t : 1 - Math.pow(-2 * HP.t + 2, 2) / 2;
+  hp.position.lerpVectors(hookPos, _wp, e);
+  hp.position.y += Math.sin(Math.PI * e) * 0.12;
+  hp.quaternion.slerpQuaternions(hookQuat, _wq, e);
+}
+const hpCableMat = std(0x111318, {roughness:.6});
+let hpCable = null;
+const _c = new THREE.Vector3();
+function updateCable(){
+  hp.updateMatrixWorld(true);
+  _c.set(-0.138, -0.05, 0).applyMatrix4(hp.matrixWorld);
+  const B = new THREE.Vector3(-0.07, 0.92, 0.05);
+  const mid = new THREE.Vector3().lerpVectors(B, _c, 0.5);
+  mid.y = Math.max(0.12, Math.min(B.y, _c.y) - 0.25 - B.distanceTo(_c) * 0.15);
+  const pts = [B, new THREE.Vector3(B.x - 0.02, B.y - 0.08, B.z + 0.02), mid, new THREE.Vector3(_c.x, _c.y - 0.12, _c.z), _c.clone()];
+  const geo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.0028, 6, false);
+  if (hpCable){ hpCable.geometry.dispose(); hpCable.geometry = geo; }
+  else { hpCable = new THREE.Mesh(geo, hpCableMat); hpCable.castShadow = true; scene.add(hpCable); }
+}
+
+/* ================= KABEL & ADAPTOR ================= */
+mesh(new THREE.BoxGeometry(0.08, 0.12, 0.012), std(0xe9e7e1), [-0.75, 0.32, 0.006]);
+mesh(new THREE.BoxGeometry(0.055, 0.075, 0.045), std(0x15171c), [-0.75, 0.32, 0.035]);
+tube([[-0.75, 0.28, 0.04], [-0.68, 0.08, 0.03], [-0.35, 0.06, 0.02], [-0.16, 0.5, 0.015], [-0.1, 0.93, 0.03], [-0.09, 0.96, 0.035]], 0.003, 0x111318);
+
+/* ================= BEAM IR ================= */
+const RANGE = 0.75;
+const sensorTip = new THREE.Vector3();
+const beamMat = new THREE.MeshBasicMaterial({color:0xff2a2a, transparent:true, opacity:0.1, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending});
+const beam = new THREE.Mesh(new THREE.ConeGeometry(0.075, RANGE, 28, 1, true), beamMat);
+beam.rotation.x = -Math.PI / 2;
+scene.add(beam);
+scene.updateMatrixWorld(true);
+lens.getWorldPosition(sensorTip);
+beam.position.set(sensorTip.x, sensorTip.y, sensorTip.z + RANGE / 2);
+
+/* ================= PENGUNJUNG ================= */
+function makeVisitor(){
+  const g = new THREE.Group();
+  const skin = std(0xd6cfc4, {roughness:.8}), shirt = std(0x1f6f78, {roughness:.8}), pants = std(0x2c313b, {roughness:.85});
+  const mkLimb = (r, len, mat, x, y) => {
+    const pivot = new THREE.Group(); pivot.position.set(x, y, 0); g.add(pivot);
+    mesh(new THREE.CylinderGeometry(r, r * 0.9, len, 12), mat, [0, -len / 2, 0], pivot);
+    return pivot;
+  };
+  const legL = mkLimb(0.062, 0.86, pants, -0.09, 0.88), legR = mkLimb(0.062, 0.86, pants, 0.09, 0.88);
+  mesh(new THREE.CylinderGeometry(0.17, 0.15, 0.6, 18), shirt, [0, 1.18, 0], g);
+  mesh(new THREE.SphereGeometry(0.17, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), shirt, [0, 1.48, 0], g);
+  const armL = mkLimb(0.045, 0.6, shirt, -0.215, 1.45), armR = mkLimb(0.045, 0.6, shirt, 0.215, 1.45);
+  mesh(new THREE.CylinderGeometry(0.05, 0.055, 0.08, 12), skin, [0, 1.6, 0], g);
+  mesh(new THREE.SphereGeometry(0.11, 22, 16), skin, [0, 1.73, 0], g);
+  scene.add(g);
+  return {g, legL, legR, armL, armR};
+}
+const VIS = makeVisitor();
+const OFF = {x:-4.6, z:1.8}, STAND = {x:-0.12, z:0.72};
+const V = {x:OFF.x, z:OFF.z, rot:Math.PI / 2, queue:[], status:'off', phase:0, moving:false};
+
+const moveTo = (x, z, speed = 1.0) => V.queue.push({t:'move', x, z, speed});
+const wait = s => V.queue.push({t:'wait', s});
+const face = r => V.queue.push({t:'face', r});
+const call = fn => V.queue.push({t:'call', fn});
+
+const Actions = {
+  come(){ V.status = 'walking'; moveTo(-1.3, 1.5, 1.05); moveTo(STAND.x, STAND.z, 0.85); face(Math.PI); call(() => HP.target = 1); wait(1.0); call(() => V.status = 'stand'); },
+  leave(){ V.status = 'walking'; call(() => HP.target = 0); wait(1.0); moveTo(0.35, 1.3, 0.9); moveTo(4.8, 1.8, 1.15); call(() => { V.x = OFF.x; V.z = OFF.z; V.status = 'off'; }); },
+  pass(){ V.status = 'walking'; moveTo(-2.6, 0.62, 1.2); moveTo(4.8, 0.62, 1.35); call(() => { V.x = OFF.x; V.z = OFF.z; V.status = 'off'; }); },
+  shift(){ V.status = 'walking'; moveTo(0.62, 0.85, 0.8); face(Math.PI * 0.92); wait(1.0); moveTo(STAND.x, STAND.z, 0.8); face(Math.PI); call(() => V.status = 'stand'); }
+};
+
+function angLerp(a, b, k){ let d = ((b - a + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI; return a + d * k; }
+function updateVisitor(dt){
+  V.moving = false;
+  const task = V.queue[0];
+  if (task){
+    if (task.t === 'move'){
+      const dx = task.x - V.x, dz = task.z - V.z, dist = Math.hypot(dx, dz), step = task.speed * dt;
+      V.rot = angLerp(V.rot, Math.atan2(dx, dz), Math.min(1, dt * 8));
+      if (dist <= step){ V.x = task.x; V.z = task.z; V.queue.shift(); }
+      else { V.x += dx / dist * step; V.z += dz / dist * step; }
+      V.phase += step * 6.5; V.moving = true;
+    } else if (task.t === 'wait'){ task.s -= dt; if (task.s <= 0) V.queue.shift(); }
+    else if (task.t === 'face'){ V.rot = angLerp(V.rot, task.r, Math.min(1, dt * 6)); if (Math.abs(angLerp(0, task.r - V.rot, 1)) < 0.03) V.queue.shift(); }
+    else if (task.t === 'call'){ V.queue.shift(); task.fn(); }
+  }
+  const swing = V.moving ? Math.sin(V.phase) : 0;
+  const k = Math.min(1, dt * 10);
+  VIS.legL.rotation.x += (swing * 0.5 - VIS.legL.rotation.x) * k;
+  VIS.legR.rotation.x += (-swing * 0.5 - VIS.legR.rotation.x) * k;
+  VIS.armL.rotation.x += (-swing * 0.4 - VIS.armL.rotation.x) * k;
+  const reach = HP.t > 0.02 && HP.t < 0.98;
+  VIS.armR.rotation.x += ((reach ? -1.5 : swing * 0.4) - VIS.armR.rotation.x) * k;
+  VIS.g.position.set(V.x, V.moving ? Math.abs(Math.cos(V.phase)) * 0.018 : 0, V.z);
+  VIS.g.rotation.y = V.rot;
+}
+function sensorSees(){
+  const dz = V.z - sensorTip.z - 0.16;
+  return dz > -0.1 && dz < RANGE && Math.abs(V.x - sensorTip.x) < 0.2 + Math.max(0, dz) * 0.1;
+}
+
+/* ================= DEMO ================= */
+let demo = true, demoIdx = 0;
+const DEMO = [['wait', 1.5], ['pass'], ['wait', 1.5], ['come'], ['wait', 6], ['shift'], ['wait', 13], ['leave'], ['wait', 3], ['come'], ['wait', 5], ['leave'], ['wait', 4]];
+function runDemo(){
+  if (!demo || V.queue.length) return;
+  const [a, s] = DEMO[demoIdx % DEMO.length]; demoIdx++;
+  if (a === 'wait') wait(s); else Actions[a]();
+}
+
+/* ================= LOGIKA KONTROLER ================= */
+const VOL_MIN = 3, VOL_MAX = 24, VOL_DEFAULT = 15, T_FADE_STEP = 40, T_SAVE = 3000;
+const F = {boot:true, state:'STANDBY', hadir:false, rawPrev:false, raw:false, rawChangeAt:0,
+  volume:VOL_DEFAULT, out:0, fadingIn:false, fadingOut:false, fadeStepAt:0,
+  playPos:0, doneAt:0, volDirty:false, volChangedAt:0, ledFlashUntil:0,
+  tHadir:800, tPergi:3000, trackLen:18, ulang:false};
+let now = 0;
+
+const logEl = $('log');
+function log(msg, cls = ''){
+  const s = (now / 1000);
+  const mm = Math.floor(s / 60), ss = (s % 60).toFixed(1).padStart(4, '0');
+  const line = document.createElement('div');
+  line.innerHTML = `<span class="t">[${String(mm).padStart(2, '0')}:${ss}]</span> <span class="${cls}"></span>`;
+  line.lastChild.textContent = msg;
+  logEl.appendChild(line);
+  while (logEl.childNodes.length > 120) logEl.removeChild(logEl.firstChild);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+function eepromRead(){ try { const v = parseInt(localStorage.getItem('omah3dns.museumAudio.hpvol'), 10); return isNaN(v) ? null : v; } catch(e){ return null; } }
+function eepromWrite(v){ try { localStorage.setItem('omah3dns.museumAudio.hpvol', String(v)); } catch(e){} }
+
+const bootSeq = [
+  [0, '=== Audio Interaktif Museum ==='],
+  [20, () => { const v = eepromRead(); if (v !== null) F.volume = Math.min(VOL_MAX, Math.max(VOL_MIN, v)); return 'Volume tersimpan: ' + F.volume; }],
+  [80, 'Tombol volume OK'],
+  [1600, ['Modul audio siap.', 'hl']], [1650, 'STANDBY - menunggu pengunjung']
+];
+let bootI = 0;
+function bootStep(){
+  while (bootI < bootSeq.length && now >= bootSeq[bootI][0]){
+    let m = bootSeq[bootI][1]; let cls = '';
+    if (typeof m === 'function') m = m();
+    if (Array.isArray(m)) { cls = m[1]; m = m[0]; }
+    log(m, cls); bootI++;
+  }
+  if (bootI >= bootSeq.length){ F.boot = false; F.rawPrev = F.raw; F.rawChangeAt = now; }
+}
+
+function changeVolume(step){
+  if (F.boot) return;
+  const v = Math.min(VOL_MAX, Math.max(VOL_MIN, F.volume + step));
+  (step > 0 ? btnUp3 : btnDn3).position.z = 0.034; setTimeout(() => { btnUp3.position.z = btnDn3.position.z = 0.037; }, 120);
+  if (v === F.volume) return;
+  F.volume = v; F.fadingIn = false;
+  if (F.state === 'PLAYING' && !F.fadingOut) F.out = F.volume;
+  F.volDirty = true; F.volChangedAt = now; F.ledFlashUntil = now + 80;
+  log('Volume: ' + v);
+}
+function startPlay(){
+  F.out = 0; F.fadingIn = true; F.fadeStepAt = now; F.playPos = 0;
+  F.state = 'PLAYING'; log('Audio DIPUTAR', 'hl');
+}
+function firmwareStep(dt){
+  if (F.boot){ bootStep(); return; }
+  if (F.fadingOut){                       // fade-out (blocking di firmware)
+    while (F.fadingOut && now - F.fadeStepAt >= T_FADE_STEP){
+      F.fadeStepAt += T_FADE_STEP; F.out -= 2;
+      if (F.out <= 0){ F.out = 0; F.fadingOut = false; F.state = 'STANDBY'; F.playPos = 0; log('Audio BERHENTI -> STANDBY', 'w'); F.rawPrev = F.raw; F.rawChangeAt = now; }
+    }
+    F.playPos += dt; return;
+  }
+  // updatePresence
+  if (F.raw !== F.rawPrev){ F.rawPrev = F.raw; F.rawChangeAt = now; }
+  const stable = now - F.rawChangeAt;
+  if (!F.hadir && F.raw && stable >= F.tHadir){ F.hadir = true; log('Pengunjung HADIR'); }
+  else if (F.hadir && !F.raw && stable >= F.tPergi){ F.hadir = false; log('Pengunjung PERGI'); }
+  // fade-in
+  while (F.fadingIn && now - F.fadeStepAt >= T_FADE_STEP){
+    F.fadeStepAt += T_FADE_STEP; F.out++;
+    if (F.out >= F.volume){ F.out = F.volume; F.fadingIn = false; }
+  }
+  // EEPROM
+  if (F.volDirty && now - F.volChangedAt >= T_SAVE){ eepromWrite(F.volume); F.volDirty = false; log('Volume disimpan', 'hl'); }
+
+  switch (F.state){
+    case 'STANDBY': if (F.hadir) startPlay(); break;
+    case 'PLAYING':
+      F.playPos += dt;
+      if (!F.hadir){ F.fadingIn = false; F.fadingOut = true; F.fadeStepAt = now; }
+      else if (F.playPos >= F.trackLen){ F.fadingIn = false; F.out = 0; F.playPos = F.trackLen; F.state = 'SELESAI'; F.doneAt = now; log('Audio SELESAI, menunggu pengunjung pergi'); }
+      break;
+    case 'SELESAI':
+      if (!F.hadir){ F.state = 'STANDBY'; F.playPos = 0; log('STANDBY - siap untuk pengunjung berikutnya'); }
+      else if (F.ulang && now - F.doneAt >= 2000) startPlay();
+      break;
+  }
+}
+function ledOn(){
+  if (F.boot) return Math.floor(now / 120) % 2 === 0;
+  if (now < F.ledFlashUntil) return F.state !== 'PLAYING';
+  if (F.state === 'PLAYING') return true;
+  if (F.state === 'STANDBY') return Math.floor(now / 1000) % 2 === 0;
+  return false;
+}
+const audible = () => (F.state === 'PLAYING') ? F.out : 0;
+
+/* ================= SUARA (opsional, Web Audio) ================= */
+let actx = null, master = null, soundOn = false, nextNote = 0;
+const SCALE = [261.6, 293.7, 329.6, 392.0, 440.0, 523.3, 587.3];
+function initAudio(){
+  if (actx) return;
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  master = actx.createGain(); master.gain.value = 0; master.connect(actx.destination);
+}
+function soundTick(){
+  if (!actx) return;
+  const lvl = soundOn ? Math.pow(audible() / VOL_MAX, 1.6) * 0.35 : 0;
+  master.gain.setTargetAtTime(lvl, actx.currentTime, 0.05);
+  if (!soundOn || audible() <= 0) return;
+  if (actx.currentTime >= nextNote){
+    const t = actx.currentTime + 0.02, f = SCALE[(Math.random() * SCALE.length) | 0];
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.5, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + 1);
+    nextNote = actx.currentTime + 0.32 + Math.random() * 0.4;
+  }
+}
+
+/* ================= LABEL ================= */
+const labelsEl = $('labels');
+let showLabels = true, cutaway = false;
+const labels = [];
+function addLabel(text, getPos, kind = 'out'){
+  const el = document.createElement('div'); el.className = 'lbl' + (kind === 'in' ? ' in' : '') + (kind === 'below' ? ' below' : ''); el.textContent = text;
+  labelsEl.appendChild(el); labels.push({el, getPos, kind});
+}
+const tmp = new THREE.Vector3();
+const fixed = (x, y, z) => () => tmp.set(x, y, z);
+const ofObj = (o, dy = 0.012) => () => { o.getWorldPosition(tmp); tmp.y += dy; return tmp; };
+addLabel('Mading / panel informasi', fixed(-0.3, PANEL_Y + 0.47, 0.05));
+addLabel('Headphone', () => tmp.set(hp.position.x, hp.position.y + 0.17, hp.position.z));
+addLabel('Box kontrol', fixed(-0.06, 1.045, 0.07), 'box');
+addLabel('Sensor InfraRed', () => tmp.set(sensorTip.x, sensorTip.y - 0.01, sensorTip.z), 'below');
+addLabel('Adaptor daya', fixed(-0.75, 0.4, 0.05));
+addLabel('Mikrokontroler', ofObj(nano), 'in');
+addLabel('Modul pemutar audio', ofObj(dfp), 'in');
+addLabel('Kapasitor', ofObj(elco, 0.01), 'in');
+addLabel('Terminal kabel', ofObj(terms[0], 0.008), 'in');
+function updateLabels(w, h){
+  for (const L of labels){
+    const vis = showLabels && (L.kind === 'in' ? cutaway : L.kind === 'box' ? !cutaway : true);
+    if (!vis){ L.el.classList.add('hidden'); continue; }
+    const p = L.getPos().clone().project(camera);
+    if (p.z > 1 || p.z < -1){ L.el.classList.add('hidden'); continue; }
+    L.el.classList.remove('hidden');
+    L.el.style.left = ((p.x * 0.5 + 0.5) * w) + 'px';
+    L.el.style.top = ((-p.y * 0.5 + 0.5) * h + (L.kind === 'below' ? 0 : -10)) + 'px';
+  }
+}
+
+/* ================= KAMERA ================= */
+const CAMS = {
+  front:{pos:[2.5, 1.8, 3.4], tgt:[0.15, 1.2, 0.3]},
+  side:{pos:[3.1, 1.35, 1.5], tgt:[0.1, 1.05, 0.35]},
+  box:{pos:[0.22, 1.02, 0.42], tgt:[0, 0.975, 0.03]}
+};
+let camTween = null;
+function goCam(name){
+  const c = CAMS[name];
+  camTween = {t:0, p0:camera.position.clone(), t0:controls.target.clone(), p1:new THREE.Vector3(...c.pos), t1:new THREE.Vector3(...c.tgt)};
+  setCut(name === 'box');
+}
+function setCut(on){
+  cutaway = on; inside.visible = on;
+  shellMat.opacity = on ? 0.16 : 1; shellMat.depthWrite = !on; shellMat.needsUpdate = true;
+  $('btnCut').classList.toggle('on', on);
+}
+
+/* ================= UI ================= */
+document.querySelectorAll('[data-cam]').forEach(b => b.onclick = () => goCam(b.dataset.cam));
+$('btnCut').onclick = () => setCut(!cutaway);
+$('btnLabels').onclick = e => { showLabels = !showLabels; e.currentTarget.classList.toggle('on', showLabels); };
+$('btnDemo').onclick = e => { demo = !demo; e.currentTarget.classList.toggle('on', demo); };
+$('btnSound').onclick = e => {
+  initAudio(); if (actx.state === 'suspended') actx.resume();
+  soundOn = !soundOn; e.currentTarget.classList.toggle('on', soundOn); e.currentTarget.textContent = 'Suara: ' + (soundOn ? 'hidup' : 'mati');
+};
+function manual(fn){ demo = false; $('btnDemo').classList.remove('on'); Actions[fn](); }
+$('aCome').onclick = () => manual('come');
+$('aLeave').onclick = () => manual('leave');
+$('aPass').onclick = () => manual('pass');
+$('aShift').onclick = () => manual('shift');
+$('vUp').onclick = () => changeVolume(+1);
+$('vDn').onclick = () => changeVolume(-1);
+const bindRange = (id, lid, key, fmt, mul = 1) => {
+  const el = $(id); const upd = () => { F[key] = +el.value * mul; $(lid).textContent = fmt(+el.value); };
+  el.oninput = upd; upd();
+};
+bindRange('sH', 'lH', 'tHadir', v => v + ' ms');
+bindRange('sP', 'lP', 'tPergi', v => v + ' ms');
+bindRange('sD', 'lD', 'trackLen', v => v + ' s');
+$('cU').onchange = e => F.ulang = e.target.checked;
+
+const fmtT = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+function updateHUD(){
+  const chip = $('chip'), st = F.boot ? 'BOOT' : F.state;
+  chip.textContent = F.fadingOut ? 'PLAYING · fade-out' : st; chip.className = 'chip ' + st;
+  $('led').classList.toggle('on', ledOn());
+  $('vRaw').textContent = F.raw ? 'mendeteksi orang' : 'tidak ada orang';
+  $('vRaw').style.color = F.raw ? 'var(--ir)' : '';
+  const stable = now - F.rawChangeAt;
+  const hadirP = F.hadir ? 1 : (F.raw && !F.boot ? Math.min(1, stable / F.tHadir) : 0);
+  $('bHadir').style.width = (hadirP * 100) + '%';
+  $('vHadir').textContent = F.hadir ? 'HADIR' : (F.raw ? Math.min(stable, F.tHadir).toFixed(0) + ' / ' + F.tHadir + ' ms' : '–');
+  const counting = F.hadir && !F.raw && !F.boot;
+  const left = counting ? Math.max(0, F.tPergi - stable) : 0;
+  $('bPergi').style.width = counting ? (left / F.tPergi * 100) + '%' : '0%';
+  $('vPergi').textContent = counting ? (left / 1000).toFixed(1) + ' s' : '–';
+  $('bTrack').style.width = Math.min(100, F.playPos / F.trackLen * 100) + '%';
+  $('vTrack').textContent = fmtT(F.playPos) + ' / ' + fmtT(F.trackLen);
+  $('vNum').textContent = F.volume;
+  $('bVol').style.width = (F.volume / VOL_MAX * 100) + '%';
+  $('vOut').textContent = Math.round(audible() / VOL_MAX * 100) + '%';
+  $('bOut').style.width = (audible() / VOL_MAX * 100) + '%';
+  const idle = V.queue.length === 0;
+  $('aCome').disabled = !(idle && V.status === 'off');
+  $('aPass').disabled = !(idle && V.status === 'off');
+  $('aLeave').disabled = !(idle && V.status === 'stand');
+  $('aShift').disabled = !(idle && V.status === 'stand');
+}
+
+/* ================= LOOP ================= */
+function resize(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = camera.aspect < 1 ? 62 : 42; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage); resize();
+
+const clock = new THREE.Clock();
+const SPEED = Math.min(8, Math.max(0.25, parseFloat(new URLSearchParams(location.search).get('speed')) || 1));
+let t = 0;
+function frame(){
+  requestAnimationFrame(frame);
+  const realDt = Math.min(clock.getDelta(), 0.25);
+  const dtAll = realDt * SPEED;
+  let rest = dtAll, dt = 0;
+  while (rest > 1e-6){                       // sub-step: logika tetap akurat di perangkat lambat
+    dt = Math.min(rest, 1 / 30); rest -= dt; t += dt; now += dt * 1000;
+    runDemo(); updateVisitor(dt);
+    F.raw = sensorSees();
+    firmwareStep(dt);
+  }
+
+  const lvl = audible() / VOL_MAX;
+  beamMat.opacity = F.raw ? 0.22 + Math.sin(t * 12) * 0.04 : 0.07 + Math.sin(t * 3) * 0.02;
+  lensMat.emissiveIntensity = F.raw ? 1.2 : 0.15;
+  ledMat.emissiveIntensity = ledOn() ? 2.2 : 0;
+  busyMat.emissiveIntensity = audible() > 0 ? 2.5 : 0;
+  updateHeadphone(dtAll);
+  updateCable();
+  accentMat.emissiveIntensity = lvl > 0 ? 0.6 + Math.sin(t * 6) * 0.3 * lvl + lvl : 0.1;
+  waves.forEach(m => {
+    const p = ((t * 0.9) + m.userData.i / 3) % 1;
+    m.scale.set(1 + p * 1.6, 1 + p * 1.6, 1);
+    m.material.opacity = (lvl > 0 && HP.t > 0.98) ? (1 - p) * 0.6 * Math.min(1, lvl * 1.5) : 0;
+  });
+  soundTick();
+
+  if (camTween){
+    camTween.t = Math.min(1, camTween.t + realDt / 1.1);
+    const k = camTween.t < 0.5 ? 2 * camTween.t * camTween.t : 1 - Math.pow(-2 * camTween.t + 2, 2) / 2;
+    camera.position.lerpVectors(camTween.p0, camTween.p1, k);
+    controls.target.lerpVectors(camTween.t0, camTween.t1, k);
+    if (camTween.t >= 1) camTween = null;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+  updateLabels(stage.clientWidth, stage.clientHeight);
+  updateHUD();
+}
+frame();
+})();
+</script>
+</body>
+</html>
