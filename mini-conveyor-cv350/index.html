@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<title>Mini Conveyor CV350-350</title>
+<meta name="description" content="Mini belt conveyor 350 × 350 mm dengan gearmotor DC 12V dan PWM speed control — model 3D interaktif oleh omah3dns.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: datasheet sheet — title block, big live viewer with control pendant beside it, then spec / signal path / BOM in a ruled grid */
+:root{
+  --bg:#eef0f2; --paper:#f8f9fa; --ink:#15191e; --muted:#5a6470; --rule:#d3d8de;
+  --accent:#1d3fd0;            /* anodized blue, from the side plates */
+  --signal:#e08a00;            /* PWM / power amber */
+  --ok:#1f9d55;
+  --stage-a:#f4f6f8; --stage-b:#dde2e7;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1216; --paper:#161a20; --ink:#e7eaee; --muted:#97a1ad; --rule:#2a313a;
+  --accent:#7d97ff; --signal:#ffb02e; --ok:#3ccf7d; --stage-a:#1c2129; --stage-b:#0d1014; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1216; --paper:#161a20; --ink:#e7eaee; --muted:#97a1ad; --rule:#2a313a;
+  --accent:#7d97ff; --signal:#ffb02e; --ok:#3ccf7d; --stage-a:#1c2129; --stage-b:#0d1014; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+.wrap{max-width:1200px;margin:0 auto;padding-inline:20px;padding-block:28px 48px;display:grid;gap:28px}
+a{color:var(--accent)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* title block */
+header.tb{display:grid;grid-template-columns:1fr auto;gap:16px 32px;align-items:end;border-bottom:2px solid var(--ink);padding-bottom:16px}
+.brand{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.brand b{color:var(--accent);font-weight:500}
+h1{font-family:var(--f-display);font-stretch:78%;font-weight:800;font-size:clamp(34px,6vw,64px);line-height:.95;margin:6px 0 10px;letter-spacing:-.01em;text-wrap:balance}
+h1 span{color:var(--accent)}
+.lede{max-width:62ch;margin:0;color:var(--muted)}
+.tbmeta{display:grid;grid-template-columns:auto auto;gap:2px 14px;font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);padding:10px 12px;background:var(--paper)}
+.tbmeta dt{color:var(--muted)} .tbmeta dd{margin:0}
+
+/* viewer + pendant */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:0;border:1px solid var(--rule);background:var(--paper)}
+.view{position:relative;min-height:440px;height:min(66vh,620px);background:radial-gradient(120% 90% at 50% 35%,var(--stage-a),var(--stage-b));overflow:hidden}
+.view canvas{display:block;width:100%;height:100%;touch-action:none}
+.views{position:absolute;left:12px;top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 12px var(--f-mono);border:1px solid var(--rule);background:var(--paper);color:var(--ink);padding:6px 10px;cursor:pointer}
+.chip:hover{border-color:var(--accent)} .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip:focus-visible,.btn:focus-visible,input:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.tip{position:absolute;pointer-events:none;font:500 12px var(--f-mono);background:var(--ink);color:var(--paper);padding:4px 8px;transform:translate(12px,12px);white-space:nowrap}
+.loading{position:absolute;inset:0;display:grid;place-items:center;font:500 13px var(--f-mono);color:var(--muted)}
+.hint{position:absolute;right:12px;bottom:10px;font:400 11px var(--f-mono);color:var(--muted)}
+
+.pendant{border-left:1px solid var(--rule);padding:18px;display:grid;gap:16px;align-content:start}
+.ph{font-family:var(--f-display);font-stretch:85%;font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.led{width:10px;height:10px;border-radius:50%;background:var(--rule);box-shadow:none;transition:.2s}
+.led.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{font:600 13px var(--f-body);padding:10px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);cursor:pointer}
+.btn[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.btn.power[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+label.lb{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+label.lb output{color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--signal)}
+.gauge{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule)}
+.gauge div{padding:8px 10px;display:grid;gap:2px}
+.gauge div+div{border-left:1px solid var(--rule)}
+.gauge small{font:500 10px var(--f-mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.gauge b{font:600 20px var(--f-mono);font-variant-numeric:tabular-nums}
+.gauge i{font:400 11px var(--f-mono);font-style:normal;color:var(--muted)}
+.pwm{height:34px;width:100%;display:block}
+.pwm path{fill:none;stroke:var(--signal);stroke-width:1.6}
+.pwm line{stroke:var(--rule)}
+.note{font-size:12px;color:var(--muted);margin:0}
+.rpm{display:flex;align-items:center;gap:8px;font:500 12px var(--f-mono);color:var(--muted)}
+.rpm input{width:70px;font:500 13px var(--f-mono);padding:4px 6px;background:var(--bg);color:var(--ink);border:1px solid var(--rule)}
+
+/* sections */
+section{display:grid;gap:14px}
+h2{font-family:var(--f-display);font-stretch:80%;font-weight:700;font-size:26px;margin:0;display:flex;gap:12px;align-items:baseline}
+h2 small{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.1em}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td.v{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tblwrap{overflow-x:auto;border-top:2px solid var(--ink)}
+.chain{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:1px solid var(--rule);background:var(--paper)}
+.chain li{list-style:none;padding:14px 12px;display:grid;gap:4px;align-content:start;position:relative}
+.chain li+li{border-left:1px solid var(--rule)}
+.chain li+li::before{content:"▶";position:absolute;left:-7px;top:16px;font-size:10px;color:var(--signal);background:var(--paper)}
+.chain small{font:500 10px var(--f-mono);color:var(--muted);letter-spacing:.08em}
+.chain b{font-family:var(--f-display);font-stretch:85%;font-size:16px;line-height:1.15}
+.chain span{font-size:12.5px;color:var(--muted)}
+.chain ol{margin:0;padding:0}
+figure{margin:0;border:1px solid var(--rule);background:#fff}
+figure img{display:block;width:100%;height:auto}
+figcaption{font:400 12px var(--f-mono);color:var(--muted);padding:8px 10px;background:var(--paper);border-top:1px solid var(--rule)}
+.points{margin:0;padding-left:18px;display:grid;gap:6px;max-width:65ch}
+footer{border-top:2px solid var(--ink);padding-top:12px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font:400 12px var(--f-mono);color:var(--muted)}
+
+@media (max-width:900px){
+  .stage{grid-template-columns:1fr}
+  .pendant{border-left:0;border-top:1px solid var(--rule)}
+  .grid2{grid-template-columns:1fr}
+  .chain{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .chain li:nth-child(odd){border-left:0}
+  .chain li:nth-child(n+3){border-top:1px solid var(--rule)}
+  .chain li:nth-child(odd)::before{display:none}
+  header.tb{grid-template-columns:1fr}
+  .view{height:56vh;min-height:340px}
+  td.v{white-space:normal}
+  .hint{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<a href="../" style="position:fixed;z-index:50;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);font:500 12px/1 'IBM Plex Mono',ui-monospace,monospace;padding:8px 10px;border-radius:3px;background:rgba(20,26,28,.82);color:#fff;text-decoration:none">&larr; omah3dns</a>
+<div class="wrap">
+  <header class="tb">
+    <div>
+      <div class="brand"><b>omah3dns</b> · desain &amp; prototipe</div>
+      <h1>Mini Conveyor <span>CV350-350</span></h1>
+      <p class="lede">Belt conveyor ringkas dengan lebar belt 350 mm, digerakkan gearmotor DC 12 V dan diatur kecepatannya lewat PWM speed controller. Putar modelnya, nyalakan motor, dan atur knob kecepatan di panel kanan.</p>
+    </div>
+    <dl class="tbmeta">
+      <dt>Model</dt><dd>CV350350</dd>
+      <dt>Belt</dt><dd>350 × 750 mm (loop)</dd>
+      <dt>Supply</dt><dd>12 V DC</dd>
+      <dt>CAD</dt><dd>SolidWorks 2020</dd>
+      <dt>Rev</dt><dd>A · Okt 2026</dd>
+    </dl>
+  </header>
+
+  <div class="stage">
+    <div class="view" id="view">
+      <div class="loading" id="loading">Memuat model 3D…</div>
+      <div class="views" role="group" aria-label="Sudut pandang">
+        <button class="chip" id="v-iso" aria-pressed="true">Iso</button>
+        <button class="chip" id="v-front">Depan</button>
+        <button class="chip" id="v-top">Atas</button>
+        <button class="chip" id="v-motor">Sisi motor</button>
+        <button class="chip" id="v-spin" aria-pressed="false">Auto-putar</button>
+      </div>
+      <div class="tip" id="tip" hidden></div>
+      <div class="hint">seret = putar · scroll/cubit = zoom · arahkan ke part untuk nama</div>
+    </div>
+
+    <aside class="pendant" aria-label="Panel kendali">
+      <div class="ph">Panel kendali <span class="led" id="led"></span></div>
+      <div class="row2">
+        <button class="btn power" id="power" aria-pressed="true">ON</button>
+        <button class="btn" id="dir" aria-pressed="false">Arah: Maju</button>
+      </div>
+      <div>
+        <label class="lb" for="duty">Knob kecepatan (duty PWM) <output id="dutyOut">60%</output></label>
+        <input type="range" id="duty" min="0" max="100" value="60">
+        <svg class="pwm" id="pwm" viewBox="0 0 260 34" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="30" x2="260" y2="30"/><path id="pwmPath" d=""/></svg>
+      </div>
+      <div class="gauge">
+        <div><small>Duty</small><b id="gDuty">60</b><i>%</i></div>
+        <div><small>Motor</small><b id="gRpm">0</b><i>rpm</i></div>
+        <div><small>Belt</small><b id="gV">0</b><i>m/menit</i></div>
+      </div>
+      <div class="rpm"><label for="rpmMax">RPM motor @100%</label><input id="rpmMax" type="number" min="10" max="300" step="1" value="85"></div>
+      <div>
+        <label class="lb" for="explode">Tampilan urai (exploded) <output id="exOut">0%</output></label>
+        <input type="range" id="explode" min="0" max="100" value="0">
+      </div>
+      <div class="row2">
+        <button class="btn" id="load" aria-pressed="true">Muatan: tampil</button>
+        <button class="btn" id="reset">Reset tampilan</button>
+      </div>
+      <p class="note">Kecepatan belt = π × Ø roller penggerak (±47 mm termasuk belt) × rpm. RPM @100% adalah estimasi motor power window tanpa beban; isi angka hasil ukur tachometer bila ada. Di bawah ±12% duty motor belum berputar (dead band).</p>
+    </aside>
+  </div>
+
+  <div class="grid2">
+    <section>
+      <h2>Spesifikasi <small>DARI MODEL CAD</small></h2>
+      <div class="tblwrap"><table>
+        <tbody>
+          <tr><th>Dimensi keseluruhan (P × L × T)</th><td class="v">391 × 499 × 131 mm</td></tr>
+          <tr><th>Lebar belt</th><td class="v">350 mm</td></tr>
+          <tr><th>Panjang belt (keliling)</th><td class="v">750 mm</td></tr>
+          <tr><th>Jarak sumbu roller</th><td class="v">308 mm</td></tr>
+          <tr><th>Tinggi permukaan belt dari lantai</th><td class="v">±85 mm</td></tr>
+          <tr><th>Roller penggerak</th><td class="v">Ø45 mm, poros Ø10 × 405</td></tr>
+          <tr><th>Roller idler</th><td class="v">pipa PVC Ø32 × 319, poros Ø10 × 380</td></tr>
+          <tr><th>Bantalan</th><td class="v">4 × bearing 6000</td></tr>
+          <tr><th>Rangka</th><td class="v">profil aluminium 2040 + kaki 2020</td></tr>
+          <tr><th>Penggerak</th><td class="v">gearmotor DC 12 V (tipe power window), coupling 10 × 10</td></tr>
+          <tr><th>Kendali</th><td class="v">PWM speed controller + knob, DC jack 5,5 × 2,1</td></tr>
+          <tr><th>Pendingin</th><td class="v">kipas 80 × 80 mm 12 V</td></tr>
+          <tr><th>Kecepatan belt (estimasi)</th><td class="v">0 – ±12,5 m/menit</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Desain <small>CATATAN ENGINEERING</small></h2>
+      <ul class="points">
+        <li><b>Head drive.</b> Motor menggerakkan roller di ujung keluaran, sehingga sisi atas belt ditarik, bukan didorong. Belt lebih stabil dan tidak mudah menggelembung di tengah.</li>
+        <li><b>Penegang di ujung idler.</b> Dudukan idler (END_ADJ_HOLDER) bisa digeser di slot profil untuk menyetel tegangan dan meluruskan jalur belt.</li>
+        <li><b>Gearmotor power window.</b> Murah, mudah didapat, torsi tinggi pada rpm rendah, dan sudah memakai roda gigi cacing, jadi belt tidak mundur sendiri saat motor mati.</li>
+        <li><b>Kecepatan variabel tanpa PLC.</b> Modul PWM mengatur tegangan rata-rata ke motor; knob di kotak kontrol langsung mengubah kecepatan belt.</li>
+        <li><b>Kotak kontrol berventilasi.</b> Kisi heksagonal dan kipas 80 mm membuang panas dari modul PWM dan motor.</li>
+      </ul>
+      <figure>
+        <img src="render-solidworks.png" alt="Render isometrik SolidWorks mini conveyor CV350-350 dengan belt hijau dan pelat samping biru" loading="lazy">
+        <figcaption>Render SolidWorks · CV350350.SLDASM</figcaption>
+      </figure>
+    </section>
+  </div>
+
+  <section>
+    <h2>Alur daya &amp; gerak <small>12 V DC → BELT</small></h2>
+    <ol class="chain">
+      <li><small>SUMBER</small><b>Adaptor 12 V DC</b><span>masuk lewat DC jack 5,5 × 2,1</span></li>
+      <li><small>KENDALI</small><b>PWM speed controller</b><span>knob mengatur duty 0–100%</span></li>
+      <li><small>PENGGERAK</small><b>Gearmotor DC 12 V</b><span>reduksi roda gigi cacing</span></li>
+      <li><small>TRANSMISI</small><b>Coupling 10 × 10</b><span>pinion ke poros Ø10</span></li>
+      <li><small>ROLLER</small><b>Roller penggerak Ø45</b><span>2 bearing 6000</span></li>
+      <li><small>OUTPUT</small><b>Belt 350 mm</b><span>kembali lewat idler PVC Ø32</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Daftar komponen <small>BOM DARI STEP</small></h2>
+    <div class="tblwrap"><table>
+      <thead><tr><th>Komponen</th><th>Part CAD</th><th>Qty</th></tr></thead>
+      <tbody id="bom"></tbody>
+    </table></div>
+  </section>
+
+  <footer>
+    <span>Desain &amp; engineering oleh Lukman · <a href="../">omah3dns</a></span>
+    <span>Model: CV350350.STEP → glTF · three.js r160</span>
+  </footer>
+</div>
+
+<script src="conveyor-glb.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+
+/* ---------- BOM ---------- */
+const BOM=[
+ ['Profil aluminium 2040 × 350 (rangka utama)','AL-2040-350350',1],
+ ['Profil aluminium 2020 × 80 (kaki ujung idler)','2020-80',2],
+ ['Siku aluminium','SIKU+ALU',4],
+ ['Belt PVC 350 × 750','BELT-350-750',1],
+ ['Sleeve roller penggerak','DRIVER_ROLLER_panjang',2],
+ ['Roller penggerak Ø45','ROLLER_200',1],
+ ['Poros Ø10 × 405 (penggerak)','SHAFT10-L405',1],
+ ['Pipa PVC Ø32 × 319 (idler)','ROLLER 32-319',1],
+ ['Tutup ujung roller idler','IDLER_ROLLER_32PVC',2],
+ ['Poros Ø10 × 380 (idler)','SHAFT10-L380',1],
+ ['Bearing 6000','SKF 6000',4],
+ ['Dudukan roller penggerak','END_FIX_HOLDER.R',2],
+ ['Dudukan idler adjustable (kanan/kiri)','END_ADJ_HOLDER.R35',2],
+ ['Ring pengunci & spacer poros','END_FIX_RING · SPACER 10',2],
+ ['Gearmotor DC 12 V (power window RH)','POWER WINDOW RH',1],
+ ['Coupling poros 10 × 10','COUPLING_10X10',1],
+ ['Dudukan motor','MOTOR_MOUNT_R',1],
+ ['Kotak kontrol (cover motor)','MOTOR_COVER · MOTOR_COVER_2',2],
+ ['PWM speed controller + knob','PWM · knob',1],
+ ['DC jack 5,5 × 2,1 mm 10 A','Power Jack Socket',1],
+ ['Kipas 80 × 80 mm 12 V','8x8 cm 12V Fan',1],
+ ['Dudukan kaki profil 2020','FOOT MOUNT 2020',2],
+ ['Kaki ujung penggerak','FOOT_FIX · FOOT_FIX-2',2],
+ ['Kaki karet','RUBBER_FOOT',2],
+ ['Tutup ujung profil 2020','PLUG2020',4],
+ ['Baut M3 × 4 (ISO 7045)','ISO 7045 M3×4',3],
+];
+document.getElementById('bom').innerHTML=BOM.map(([a,b,q])=>`<tr><td>${a}</td><td class="v">${b}</td><td class="v">${q}</td></tr>`).join('');
+
+/* ---------- geometry constants (m, from CAD) ---------- */
+const DRV={x:0.0740,y:0.0248,r:0.0245};   // drive roller axis + belt pitch radius
+const IDL={x:-0.2340,y:0.0286,r:0.0207};  // idler
+const SPAN=DRV.x-IDL.x;                  // 0.308
+const BELT_TOP=0.0493;
+
+/* friendly names for hover */
+const LABELS=[
+ [/^AL-2040/,'Profil aluminium 2040 (rangka)'],[/^2020-80/,'Profil aluminium 2020 (kaki)'],[/^SIKU/,'Siku aluminium'],
+ [/^BELT/,'Belt PVC 350 × 750'],[/^DRIVER_ROLLER|^ROLLER_200/,'Roller penggerak Ø45'],[/^SHAFT10-L405/,'Poros penggerak Ø10'],
+ [/^ROLLER_32|^IDLER/,'Roller idler PVC Ø32'],[/^SHAFT10-L380/,'Poros idler Ø10'],[/bearing/i,'Bearing 6000'],
+ [/^END_FIX_HOLDER/,'Dudukan roller penggerak'],[/END_ADJ_HOLDER/,'Dudukan idler (penegang belt)'],[/^END_FIX_RING/,'Ring pengunci'],
+ [/^SPACER/,'Spacer poros'],[/^POWER_WINDOW|^PW_|^PINION/,'Gearmotor DC 12 V'],[/^COUPLING/,'Coupling 10 × 10'],
+ [/^MOTOR_MOUNT/,'Dudukan motor'],[/^MOTOR_COVER/,'Kotak kontrol'],[/^PWM/,'PWM speed controller'],[/^knob/,'Knob kecepatan'],
+ [/Power_Jack/,'DC jack 12 V'],[/Fan|Coil/,'Kipas 80 mm 12 V'],[/^FOOT_MOUNT/,'Dudukan kaki 2020'],[/^FOOT_FIX/,'Kaki ujung penggerak'],
+ [/^RUBBER_FOOT/,'Kaki karet'],[/^PLUG2020/,'Tutup profil 2020'],[/screw/i,'Baut M3'],
+];
+const labelOf=o=>{for(let n=o;n;n=n.parent){for(const [re,t] of LABELS) if(re.test(n.name)) return t;} return null;};
+
+/* ---------- renderer ---------- */
+const view=document.getElementById('view');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.toneMapping=THREE.LinearToneMapping; renderer.toneMappingExposure=0.9;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+view.prepend(renderer.domElement);
+const scene=new THREE.Scene();
+const pmrem=new THREE.PMREMGenerator(renderer);
+scene.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture;
+const sun=new THREE.DirectionalLight(0xffffff,1.6);
+sun.position.set(-0.4,1.0,0.6); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-0.5,right:0.5,top:0.5,bottom:-0.5,near:0.1,far:3}); sun.shadow.bias=-0.0004;
+scene.add(sun); scene.add(new THREE.HemisphereLight(0xffffff,0x8090a0,0.35));
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(4,4),new THREE.ShadowMaterial({opacity:0.22}));
+ground.rotation.x=-Math.PI/2; ground.position.y=-0.0353; ground.receiveShadow=true; scene.add(ground);
+
+const camera=new THREE.PerspectiveCamera(35,1,0.01,20);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.minDistance=0.25; controls.maxDistance=3; controls.maxPolarAngle=Math.PI*0.52;
+const CENTER=new THREE.Vector3(-0.058,0.03,-0.005);
+const VIEWS={
+  iso:[-0.30,0.46,0.70], front:[0,0.12,0.95], top:[0.0001,1.05,0.001], motor:[0.55,0.32,-0.65]
+};
+let tween=null;
+function goView(k){
+  const to=new THREE.Vector3(...VIEWS[k]).add(CENTER);
+  tween={from:camera.position.clone(),to,t:0,tf:controls.target.clone()};
+  document.querySelectorAll('.views .chip:not(#v-spin)').forEach(b=>b.setAttribute('aria-pressed',b.id==='v-'+k));
+}
+camera.position.set(...VIEWS.iso).add(CENTER); controls.target.copy(CENTER);
+['iso','front','top','motor'].forEach(k=>document.getElementById('v-'+k).onclick=()=>goView(k));
+const spinBtn=document.getElementById('v-spin');
+spinBtn.onclick=()=>{controls.autoRotate=!controls.autoRotate; controls.autoRotateSpeed=1.2; spinBtn.setAttribute('aria-pressed',controls.autoRotate);};
+
+function resize(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(view); resize();
+
+/* ---------- state ---------- */
+const st={on:true,dir:1,duty:0.6,rpmMax:85,explode:0,load:true,beltS:0};
+const $=id=>document.getElementById(id);
+
+/* ---------- model ---------- */
+const spinGroups=[]; // {pivots:[], axisWorld, getOmega}
+let root=null, beltMat=null, parts=[], boxes=[];
+const beltUniforms={uOff:{value:0},uLift:{value:0}};
+
+const _b=atob(window.CONVEYOR_GLB||''); const _u=new Uint8Array(_b.length); for(let i=0;i<_b.length;i++)_u[i]=_b.charCodeAt(i);
+new GLTFLoader().parse(_u.buffer,'',gltf=>{
+  const model=gltf.scene; scene.add(model);
+  root=model.getObjectByName('CV350350')||model;
+  model.updateMatrixWorld(true);
+  model.traverse(o=>{
+    if(!o.isMesh) return;
+    o.castShadow=o.receiveShadow=true;
+    const m=o.material.clone(); o.material=m;
+    const nm=(labelOf(o)||'');
+    if(/Profil|Siku/.test(nm)){m.metalness=0.85;m.roughness=0.32;}
+    else if(/Poros|Bearing|Baut|Coupling/.test(nm)){m.metalness=1;m.roughness=0.25;}
+    else {m.metalness=0.0;m.roughness=0.55;}
+    if(/^Belt/.test(nm)){ m.roughness=0.75; m.color.multiplyScalar(0.62); patchBelt(m); }
+  });
+
+  // rotating groups — pivot per original parent, axis through roller centre
+  const mkGroup=(re,center,axis,omega)=>{
+    const objs=[]; root.traverse(o=>{ if(re.test(o.name) && !(o.parent && re.test(o.parent.name))) objs.push(o); });
+    const byParent=new Map(); objs.forEach(o=>{ if(!byParent.has(o.parent)) byParent.set(o.parent,[]); byParent.get(o.parent).push(o); });
+    const pivots=[];
+    byParent.forEach((list,parent)=>{
+      const pv=new THREE.Object3D(); pv.name='pivot';
+      parent.add(pv); parent.updateMatrixWorld(true);
+      pv.position.copy(parent.worldToLocal(center.clone())); pv.updateMatrixWorld(true);
+      list.forEach(o=>pv.attach(o));
+      const q=new THREE.Quaternion(); parent.getWorldQuaternion(q);
+      pivots.push({pv,axis:axis.clone().applyQuaternion(q.invert()).normalize()});
+    });
+    const g={pivots,angle:0,omega}; spinGroups.push(g); return g;
+  };
+  const Z=new THREE.Vector3(0,0,1), X=new THREE.Vector3(1,0,0);
+  mkGroup(/^(DRIVER_ROLLER|ROLLER_200|SHAFT10-L405|COUPLING|PINION)/,new THREE.Vector3(DRV.x,DRV.y,0),Z,v=>-v/DRV.r);
+  mkGroup(/^(IDLER_ROLLER|ROLLER_32|SHAFT10-L380)/,new THREE.Vector3(IDL.x,IDL.y,0),Z,v=>-v/IDL.r);
+  mkGroup(/^Fan\.?STEP$/,new THREE.Vector3(0.029,0.050,-0.242),Z,()=>st.on?-120:0);
+  knob=mkGroup(/^knob/,new THREE.Vector3(0.129,0.0813,-0.2022),X,null);
+
+  // explode setup: direct children of root
+  const c=new THREE.Vector3(-0.058,0.03,0.0);
+  root.children.forEach(ch=>{
+    const b=new THREE.Box3().setFromObject(ch); if(b.isEmpty()) return;
+    const pc=b.getCenter(new THREE.Vector3());
+    const d=pc.clone().sub(c); d.y=d.y*1.6+0.02;
+    if(/^BELT/.test(ch.name)) d.set(0,0.16,0);
+    parts.push({o:ch,base:ch.position.clone(),dir:ch.parent.worldToLocal(pc.clone().add(d)).sub(ch.parent.worldToLocal(pc.clone()))});
+  });
+
+  // sample load: three cartons
+  const boxMat=new THREE.MeshStandardMaterial({color:0xc49a6c,roughness:0.85});
+  [[0.06,0.045,0.08,-0.07],[0.05,0.04,0.06,0.08],[0.08,0.05,0.07,0.0]].forEach(([w,h,d,z],i)=>{
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),boxMat); m.castShadow=m.receiveShadow=true;
+    m.position.set(IDL.x+0.03+i*0.11,BELT_TOP+h/2,z+0.024); m.userData.h=h; scene.add(m); boxes.push(m);
+  });
+  $('loading').remove();
+},e=>{ $('loading').textContent='Model gagal dimuat. Muat ulang halaman.'; console.error(e); });
+let knob=null;
+
+/* belt: moving cleat lines along the loop, computed from position on the belt path */
+function patchBelt(m){
+  m.onBeforeCompile=s=>{
+    s.uniforms.uOff=beltUniforms.uOff; s.uniforms.uLift=beltUniforms.uLift;
+    s.vertexShader=s.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vW;')
+      .replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvW=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    s.fragmentShader=s.fragmentShader.replace('#include <common>',`#include <common>
+varying vec3 vW; uniform float uOff; uniform float uLift;
+float beltS(vec2 p){
+  const vec2 D=vec2(${DRV.x},${DRV.y}); const vec2 I=vec2(${IDL.x},${IDL.y});
+  const float RD=${DRV.r}, RI=${IDL.r}, L=${SPAN};
+  if(p.x>=D.x){ float a=atan(p.y-D.y,p.x-D.x); return L+(1.5707963-a)*RD; }
+  if(p.x<=I.x){ float a=atan(p.y-I.y,p.x-I.x); float f=mod(-1.5707963-a,6.2831853); return 2.0*L+3.14159265*RD+f*RI; }
+  float mid=mix(I.y,D.y,(p.x-I.x)/L);
+  return p.y>mid ? (p.x-I.x) : L+3.14159265*RD+(D.x-p.x);
+}`).replace('#include <color_fragment>',`#include <color_fragment>
+{ float s=beltS(vec2(vW.x,vW.y-uLift))-uOff; float f=fract(s/0.035);
+  float line=smoothstep(0.0,0.04,f)*(1.0-smoothstep(0.10,0.14,f));
+  diffuseColor.rgb*=1.0-0.28*line; }`);
+  };
+}
+
+/* ---------- controls ---------- */
+function speed(){ // m/s of belt
+  const eff=Math.max(0,(st.duty-0.12)/0.88);
+  return st.on? eff*st.rpmMax*Math.PI*(2*DRV.r)/60 : 0;
+}
+function drawPwm(){
+  const d=st.on?st.duty:0, per=52, w=260; let p='M0 30';
+  for(let x=0;x<w;x+=per){ const hi=x+per*d; p+= d>0? ` L${x} 4 L${hi} 4 L${hi} 30 L${x+per} 30` : ` L${x+per} 30`; }
+  $('pwmPath').setAttribute('d',p);
+}
+function ui(){
+  $('gDuty').textContent=Math.round(st.duty*100);
+  $('dutyOut').textContent=Math.round(st.duty*100)+'%';
+  const v=speed(); const rpm=v/(Math.PI*2*DRV.r)*60;
+  $('gRpm').textContent=Math.round(rpm); $('gV').textContent=(v*60).toFixed(1).replace('.',',');
+  $('led').classList.toggle('on',st.on);
+  $('power').textContent=st.on?'ON':'OFF'; $('power').setAttribute('aria-pressed',st.on);
+  $('dir').textContent='Arah: '+(st.dir>0?'Maju':'Mundur'); $('dir').setAttribute('aria-pressed',st.dir<0);
+  drawPwm();
+}
+$('duty').oninput=e=>{st.duty=e.target.value/100;ui();};
+$('rpmMax').oninput=e=>{const n=+e.target.value; if(n>0&&n<1000){st.rpmMax=n;ui();}};
+$('power').onclick=()=>{st.on=!st.on;ui();};
+$('dir').onclick=()=>{st.dir*=-1;ui();};
+$('explode').oninput=e=>{st.explode=e.target.value/100;$('exOut').textContent=e.target.value+'%';};
+$('load').onclick=()=>{st.load=!st.load;$('load').textContent='Muatan: '+(st.load?'tampil':'sembunyi');$('load').setAttribute('aria-pressed',st.load);};
+$('reset').onclick=()=>{goView('iso');st.explode=0;$('explode').value=0;$('exOut').textContent='0%';};
+ui();
+
+/* hover labels */
+const ray=new THREE.Raycaster(), ptr=new THREE.Vector2(), tip=$('tip');
+renderer.domElement.addEventListener('pointermove',e=>{
+  if(!root||e.buttons) {tip.hidden=true;return;}
+  const r=renderer.domElement.getBoundingClientRect();
+  ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(ptr,camera);
+  const hit=ray.intersectObject(root,true)[0];
+  const t=hit&&labelOf(hit.object);
+  if(t){tip.textContent=t;tip.style.left=(e.clientX-r.left)+'px';tip.style.top=(e.clientY-r.top)+'px';tip.hidden=false;}
+  else tip.hidden=true;
+});
+renderer.domElement.addEventListener('pointerleave',()=>tip.hidden=true);
+
+/* ---------- loop ---------- */
+const clock=new THREE.Clock(); const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let exCur=0;
+renderer.setAnimationLoop(()=>{
+  const dt=Math.min(clock.getDelta(),0.05);
+  if(tween){ tween.t=Math.min(1,tween.t+dt*1.8); const k=1-Math.pow(1-tween.t,3);
+    camera.position.lerpVectors(tween.from,tween.to,k); controls.target.lerpVectors(tween.tf,CENTER,k); if(tween.t>=1) tween=null; }
+  const v=speed()*st.dir*(reduce?0.4:1);
+  st.beltS+=v*dt; beltUniforms.uOff.value=st.beltS;
+  exCur+= (st.explode-exCur)*Math.min(1,dt*8);
+  parts.forEach(p=>p.o.position.copy(p.base).addScaledVector(p.dir,exCur*0.9));
+  const beltPart=parts.find(p=>/^BELT/.test(p.o.name)); beltUniforms.uLift.value=beltPart?0.16*exCur*0.9:0;
+  spinGroups.forEach(g=>{
+    if(g===knob){ g.angle=-st.duty*Math.PI*1.5; }
+    else g.angle+=g.omega(v)*dt;
+    g.pivots.forEach(({pv,axis})=>pv.quaternion.setFromAxisAngle(axis,g.angle));
+  });
+  boxes.forEach((b,i)=>{
+    b.visible=st.load&&exCur<0.03;
+    b.position.x+=v*dt;
+    const span=SPAN+0.05;
+    if(b.position.x>DRV.x+0.02) b.position.x-=span;
+    if(b.position.x<IDL.x+0.01) b.position.x+=span;
+  });
+  controls.update(); renderer.render(scene,camera);
+});
+</script>
+
+</body></html>
