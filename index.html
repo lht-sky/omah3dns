@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>omah3dns · Lukman</title>
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:image" content="https://lht-sky.github.io/omah3dns/assets/omah3dns-logo-bulat.png">
+<meta name="description" content="omah3dns, rumah karya Lukman: cetak 3D dan spare part, desain mesin dan CAD, elektronik dan otomasi, serta kelas teknik vokasi.">
+<meta property="og:title" content="omah3dns · Lukman">
+<meta property="og:description" content="Dari spare part cetak 3D sampai desain mesin. Rumah untuk semua karya teknik Lukman.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one calm reading column, project sheets set like engineering drawings, title block as the closing signature */
+:root{
+  --bg:#F2F3EF;        /* kertas gambar, sedikit hijau */
+  --surface:#FAFBF8;
+  --ink:#1C2226;
+  --muted:#5D686C;
+  --line:#C8CEC9;
+  --accent:#2E6B5E;    /* hijau cat mesin */
+  --brass:#9A7428;
+  --font-display:"Newsreader", Georgia, "Times New Roman", serif;
+  --font-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161A1C;--surface:#1D2326;--ink:#E7EAE6;--muted:#9AA5A4;--line:#33403F;--accent:#7FC0AE;--brass:#D2AE62;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#161A1C;--surface:#1D2326;--ink:#E7EAE6;--muted:#9AA5A4;--line:#33403F;--accent:#7FC0AE;--brass:#D2AE62;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.65 var(--font-body);padding-inline:20px;padding-block:0}
+.wrap{max-width:1040px;margin:0 auto}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;text-wrap:balance;margin:0;line-height:1.15}
+p{margin:0}
+.mono{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.04em;color:var(--muted)}
+.label{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.prose{max-width:62ch;display:grid;gap:1em}
+section{padding-block:72px;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:10px;margin-bottom:36px}
+.sec-head h2{font-size:clamp(1.8rem,3.4vw,2.5rem)}
+
+/* hero */
+.hero{padding-block:72px 64px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:48px;align-items:end}
+.hero h1{font-size:clamp(2.6rem,6.4vw,4.6rem);letter-spacing:-.01em}
+.hero h1 em{color:var(--accent)}
+.hero .lead{font-size:1.12rem;margin-top:24px;max-width:56ch}
+.facts{display:grid;gap:0;border-top:1px solid var(--ink)}
+.facts div{display:grid;grid-template-columns:7.5rem 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.facts dt{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.facts dd{margin:0}
+
+/* career */
+.path{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border-top:2px solid var(--ink)}
+.path li{padding:14px 12px 0 0;position:relative}
+.path li::before{content:"";position:absolute;top:-7px;left:0;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--ink)}
+.path li:last-child::before{background:var(--accent);border-color:var(--accent)}
+.path .n{font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+.path .t{font-weight:500;font-size:.95rem;line-height:1.35;margin-top:4px}
+.career-notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:44px}
+.career-notes h3{font-size:1.3rem;margin-bottom:8px}
+.career-notes p{color:var(--muted);font-size:.95rem}
+
+/* project sheets */
+.sheet{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:0;border:1px solid var(--ink);background:var(--surface);margin-bottom:40px}
+.sheet .draw{border-right:1px solid var(--ink);padding:24px;display:flex;align-items:center;justify-content:center;min-height:360px;position:relative;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:20px 20px;background-position:-1px -1px}
+.sheet .draw::after{content:"";position:absolute;inset:0;background:var(--surface);opacity:.72;pointer-events:none}
+.sheet .draw svg{position:relative;z-index:1;width:100%;height:auto;max-height:440px}
+.sheet .body{padding:32px;display:grid;gap:18px;align-content:start;min-width:0}
+.sheet h3{font-size:clamp(1.6rem,2.8vw,2.1rem)}
+.sheet .meta{display:flex;flex-wrap:wrap;gap:6px 18px}
+.revs{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.revs li{display:grid;grid-template-columns:4.2rem 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.93rem}
+.revs .r{font-family:var(--font-mono);font-size:.75rem;color:var(--muted);padding-top:2px}
+.revs .ok{color:var(--accent);font-weight:600}
+.chip{display:inline-block;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid currentColor;padding:1px 7px;margin-left:6px;vertical-align:1px}
+.chip.ok{color:var(--accent)} .chip.wip{color:var(--brass)}
+.links{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.92rem}
+.titlestrip{grid-column:1/-1;border-top:1px solid var(--ink);display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.titlestrip div{padding:8px 14px;border-right:1px solid var(--line);font-family:var(--font-mono);font-size:.7rem;color:var(--muted);min-width:0}
+.titlestrip div:last-child{border-right:0}
+.titlestrip b{display:block;color:var(--ink);font-weight:500;font-size:.78rem;overflow-wrap:anywhere}
+
+/* svg drawing styles */
+.ln{stroke:var(--ink);fill:none;stroke-width:1.4}
+.ln-thin{stroke:var(--muted);fill:none;stroke-width:.8}
+.ln-acc{stroke:var(--accent);fill:none;stroke-width:1.6}
+.fill-acc{fill:var(--accent)}
+.fill-bg{fill:var(--surface)}
+.dim{stroke:var(--brass);fill:none;stroke-width:.8}
+.svgt{font-family:var(--font-mono);font-size:8px;fill:var(--muted)}
+.svgt-b{font-family:var(--font-mono);font-size:8px;fill:var(--brass)}
+.svgt-logo{font-family:var(--font-body);font-weight:600;font-size:8px;fill:var(--ink);letter-spacing:.5px}
+
+/* small works */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--ink);border-left:1px solid var(--line)}
+.work{padding:24px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;gap:10px;align-content:start;min-width:0}
+.work h3{font-size:1.28rem}
+.work p{font-size:.94rem;color:var(--muted)}
+.work .spec{font-family:var(--font-mono);font-size:.72rem;color:var(--ink);line-height:1.6}
+
+/* method */
+.steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px}
+.steps li{display:grid;gap:8px;align-content:start}
+.steps .n{font-family:var(--font-display);font-style:italic;font-size:2.4rem;color:var(--accent);line-height:1}
+.steps h3{font-size:1.2rem}
+.steps p{font-size:.94rem;color:var(--muted)}
+
+/* teaching */
+.teach{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px}
+.subjects{list-style:none;margin:0;padding:0;columns:1}
+.subjects li{padding:9px 0;border-bottom:1px solid var(--line);font-size:.95rem;display:flex;justify-content:space-between;gap:12px}
+.subjects li span:last-child{font-family:var(--font-mono);font-size:.72rem;color:var(--muted);white-space:nowrap;padding-top:3px}
+
+blockquote{margin:0;font-family:var(--font-display);font-style:italic;font-size:clamp(1.4rem,2.6vw,1.9rem);line-height:1.35;max-width:30ch;text-wrap:balance}
+
+/* closing title block */
+.tb{margin-block:16px 64px;border:2px solid var(--ink);display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));background:var(--surface)}
+.tb > div{padding:14px 16px;border-right:1px solid var(--ink);display:grid;gap:4px;align-content:start;min-width:0}
+.tb > div:last-child{border-right:0}
+.tb .k{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tb .v{font-size:.95rem}
+.tb .big{font-family:var(--font-display);font-size:1.6rem;line-height:1.2}
+
+@media (max-width:860px){
+  .hero,.teach{grid-template-columns:1fr;gap:36px}
+  .sheet{grid-template-columns:1fr}
+  .sheet .draw{border-right:0;border-bottom:1px solid var(--ink);min-height:0}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .career-notes{grid-template-columns:1fr;gap:24px}
+  .path{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:28px}
+  .tb{grid-template-columns:1fr 1fr}
+  .tb > div:first-child{grid-column:1/-1;border-right:0;border-bottom:1px solid var(--ink)}
+}
+@media (max-width:520px){
+  section{padding-block:52px}
+  .grid,.steps{grid-template-columns:1fr}
+  .path{grid-template-columns:1fr 1fr}
+  .titlestrip{grid-template-columns:1fr 1fr}
+  .titlestrip div:nth-child(2){border-right:0}
+  .sheet .body{padding:22px}
+  .facts div{grid-template-columns:6rem 1fr}
+}
+@media (prefers-reduced-motion:no-preference){
+  .spin{transform-origin:center;transform-box:fill-box;animation:spin 14s linear infinite}
+  .spin-r{transform-origin:center;transform-box:fill-box;animation:spin 40s linear infinite reverse}
+  @keyframes spin{to{transform:rotate(360deg)}}
+}
+/* brand bar */
+.topbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 24px;padding-block:22px 0}
+.brand{font-family:var(--font-mono);font-weight:500;font-size:1.05rem;letter-spacing:.02em;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:10px}
+.brand img{width:34px;height:auto;display:block}
+.brand b{color:var(--accent);font-weight:500}
+.nav{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.9rem}
+.nav a{color:var(--muted);text-decoration:none}
+.nav a:hover{color:var(--ink)}
+/* lines under one roof */
+.roof{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:2px solid var(--ink)}
+.line-item{padding:22px 20px 24px 0;display:grid;gap:10px;align-content:start;min-width:0}
+.line-item + .line-item{padding-left:20px;border-left:1px solid var(--line)}
+.line-item h3{font-size:1.35rem}
+.line-item p{font-size:.94rem;color:var(--muted)}
+.line-item .since{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--brass)}
+@media (max-width:860px){.roof{grid-template-columns:1fr 1fr}.line-item:nth-child(3){padding-left:0;border-left:0}.line-item{border-bottom:1px solid var(--line)}}
+@media (max-width:520px){.roof{grid-template-columns:1fr}.line-item,.line-item + .line-item{padding-left:0;border-left:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="topbar" aria-label="Utama">
+  <a class="brand" href="#">
+    <img src="assets/omah3dns-logo.png" alt="" width="34" height="35">
+    <span>omah<b>3d</b>ns</span>
+  </a>
+  <div class="nav"><a href="#rumah">Lini</a><a href="#karya">Karya</a><a href="#cara-kerja">Cara kerja</a><a href="#mengajar">Mengajar</a><a href="#kontak">Kontak</a></div>
+</nav>
+
+<header class="hero">
+  <div>
+    <p class="label">omah3dns · rumah karya Lukman</p>
+    <h1 style="margin-top:18px">Saya Lukman. Saya merancang mesin, lalu <em>mengajarkannya</em>.</h1>
+    <p class="lead">Tiga belas tahun saya habiskan di lantai produksi dan meja engineering. Sekarang saya mengajar anak-anak SMK, dan di sela itu tetap menggambar mesin untuk klien. Dua dunia ini saling mengisi: di pabrik saya belajar apa yang benar-benar bisa dibuat, di kelas saya belajar menjelaskannya dengan sederhana.</p>
+    <p class="lead" style="margin-top:14px;color:var(--muted)">Semuanya saya kumpulkan di <b style="color:var(--ink);font-weight:500">omah3dns</b>. Awalnya cuma meja printer 3D untuk mencetak spare part. Sekarang omah3dns jadi rumah untuk semua yang saya kerjakan, dari part kecil sampai mesin utuh.</p>
+  </div>
+  <dl class="facts">
+    <div><dt>Sekarang</dt><dd>Guru Teknik Otomasi Industri, SMKS 2 Triple J</dd></div>
+    <div><dt>Sebelumnya</dt><dd>13 tahun di Astra, Divisi Winteq · PT KMWI (AMMDes, Wintor)</dd></div>
+    <div><dt>Alat</dt><dd>SolidWorks, CadQuery, 3D printing, Excel costing</dd></div>
+    <div><dt>Freelance</dt><dd>Dari ide klien menjadi konsep 3D, lalu CAD siap produksi</dd></div>
+  </dl>
+</header>
+
+<section id="rumah">
+  <div class="sec-head">
+    <p class="label">Di bawah satu atap</p>
+    <h2>omah3dns berawal dari spare part, dan terus bertambah kamarnya</h2>
+    <p class="prose" style="color:var(--muted)">“Omah” artinya rumah. Saya ingin siapa pun yang datang membawa masalah teknik merasa seperti bertamu: duduk dulu, cerita, lalu kita cari jalan keluarnya bersama.</p>
+  </div>
+  <div class="roof">
+    <div class="line-item"><span class="since">Kamar pertama</span><h3>Cetak 3D &amp; spare part</h3><p>Part pengganti yang sudah tidak dijual, bracket, jig, dan prototipe. Diukur, digambar ulang di CAD, lalu dicetak dengan material yang sesuai fungsinya.</p></div>
+    <div class="line-item"><span class="since">Lini desain</span><h3>Desain mesin &amp; CAD</h3><p>Dari ide klien menjadi konsep 3D yang bisa diputar, lalu gambar kerja, STEP, dan STL. Lengkap dengan hitungan biaya yang masuk akal.</p></div>
+    <div class="line-item"><span class="since">Lini kontrol</span><h3>Elektronik &amp; otomasi</h3><p>Panel kontrol, rangkaian relay dan ladder logic, sampai perangkat interaktif berbasis Arduino yang siap dipakai di lapangan.</p></div>
+    <div class="line-item"><span class="since">Lini belajar</span><h3>Kelas &amp; materi vokasi</h3><p>Materi ajar dan modul praktik dari kelas saya di SMK. Dibagikan lewat <a href="https://github.com/lht-sky/guruvokasi">guruvokasi</a>.</p></div>
+  </div>
+</section>
+
+<section id="perjalanan">
+  <div class="sec-head">
+    <p class="label">Perjalanan</p>
+    <h2>Dari lantai produksi sampai kursi manajer</h2>
+  </div>
+  <ol class="path">
+    <li><div class="n">01</div><div class="t">Produksi</div></li>
+    <li><div class="n">02</div><div class="t">Teknisi</div></li>
+    <li><div class="n">03</div><div class="t">Engineering design</div></li>
+    <li><div class="n">04</div><div class="t">Purchasing</div></li>
+    <li><div class="n">05</div><div class="t">Project management officer</div></li>
+    <li><div class="n">06</div><div class="t">Manajer engineering product &amp; produksi</div></li>
+  </ol>
+  <div class="career-notes">
+    <div><h3>Astra · Winteq</h3><p>Tiga belas tahun di perusahaan engineering yang membuat mesin dan lini otomasi. Saya naik pelan-pelan, dan karena itu saya paham rasanya di setiap posisi: memegang kunci di mesin, menggambar, menawar harga ke vendor, sampai mengejar jadwal proyek.</p></div>
+    <div><h3>PT KMWI</h3><p>Ikut membangun produk kendaraan rakyat, AMMDes dan Wintor. Di sini saya belajar bahwa desain yang baik itu yang bisa diproduksi berulang, dirawat di lapangan, dan dibeli orang dengan harga yang masuk akal.</p></div>
+    <div><h3>Ruang kelas</h3><p>Sekarang saya mengajar pneumatik, hidrolik, kontrol, robotik, dan CAD. Pengalaman industri saya bawa ke kelas, supaya murid tahu untuk apa mereka belajar.</p></div>
+  </div>
+</section>
+
+<section id="karya">
+  <div class="sec-head">
+    <p class="label">Karya pilihan</p>
+    <h2>Karya yang bisa Anda coba langsung</h2>
+    <p class="prose" style="color:var(--muted)">Setiap proyek punya halaman 3D yang bisa diputar langsung di browser, termasuk di ponsel. Silakan buka dan lihat dari sudut mana pun. Daftar ini terus bertambah seiring pekerjaan baru selesai.</p>
+  </div>
+
+  <!-- CARA MENAMBAH PROYEK:
+       1. Unggah folder proyek baru (berisi index.html) ke akar repo, misalnya sparepart-xyz/
+       2. Salin satu blok <article class="sheet"> ... </article> di bawah ini, tempel di urutan yang diinginkan
+       3. Ganti label, judul, teks, data, dan href="sparepart-xyz/" -->
+
+  <!-- MUSEUM AUDIO -->
+  <article class="sheet">
+    <div class="draw" aria-hidden="true">
+      <svg viewBox="0 0 300 290">
+        <text class="svgt" x="6" y="12">TAMPAK SAMPING · TANPA SKALA</text>
+        <!-- wall + floor -->
+        <line class="ln" x1="40" y1="24" x2="40" y2="262"/>
+        <line class="ln" x1="20" y1="262" x2="290" y2="262"/>
+        <!-- mading -->
+        <rect class="ln" x="40" y="44" width="10" height="96"/>
+        <text class="svgt" x="56" y="40">mading</text>
+        <!-- headphone on hook -->
+        <path class="ln-thin" d="M50 112 h8"/>
+        <path class="ln-acc" d="M52 134 a10 12 0 0 1 12 -22 a10 12 0 0 1 4 22"/>
+        <rect class="fill-acc" x="49" y="130" width="6" height="9" rx="2"/>
+        <rect class="fill-acc" x="65" y="130" width="6" height="9" rx="2"/>
+        <!-- control box + cable -->
+        <rect class="ln" x="40" y="196" width="18" height="32"/>
+        <path class="ln-thin" d="M58 134 C66 160 66 180 52 196"/>
+        <text class="svgt" x="62" y="224">box kontrol</text>
+        <!-- IR sensor + beam -->
+        <rect class="fill-acc" x="40" y="160" width="12" height="7"/>
+        <path class="ln-acc" d="M52 163 L196 128 M52 163 L196 196" stroke-dasharray="4 3"/>
+        <text class="svgt-b" x="62" y="186">sensor IR</text>
+        <!-- visitor -->
+        <g class="ln">
+          <circle cx="176" cy="86" r="12"/>
+          <line x1="176" y1="98" x2="176" y2="180"/>
+          <line x1="176" y1="114" x2="164" y2="156"/>
+          <line x1="176" y1="114" x2="188" y2="156"/>
+          <line x1="176" y1="180" x2="166" y2="262"/>
+          <line x1="176" y1="180" x2="186" y2="262"/>
+        </g>
+        <path class="ln-acc" d="M164 88 a12 14 0 0 1 24 0"/>
+        <!-- passer-by (ignored) -->
+        <g class="ln-thin" stroke-dasharray="3 3">
+          <circle cx="250" cy="96" r="10"/>
+          <line x1="250" y1="106" x2="250" y2="182"/>
+          <line x1="250" y1="182" x2="242" y2="262"/>
+          <line x1="250" y1="182" x2="258" y2="262"/>
+        </g>
+        <text class="svgt" x="232" y="76">lewat saja</text>
+        <!-- dimension -->
+        <g class="dim"><line x1="52" y1="276" x2="196" y2="276"/><line x1="52" y1="268" x2="52" y2="282"/><line x1="196" y1="268" x2="196" y2="282"/></g>
+        <text class="svgt-b" x="124" y="273" text-anchor="middle">zona deteksi</text>
+      </svg>
+    </div>
+    <div class="body">
+      <p class="label">Pesanan museum · Elektronik interaktif</p>
+      <h3>Audio interaktif di depan mading <span class="chip ok">Simulasi 3D</span></h3>
+      <p>Museum ingin pengunjung bisa mendengar penjelasan tanpa perlu pemandu. Pengunjung cukup berdiri di depan materi dan memakai headphone yang tergantung di samping mading. Narasi untuk topik itu langsung diputar, lalu berhenti sendiri setelah pengunjung pergi.</p>
+      <p>Orang yang hanya lewat tidak memicu narasi. Volume diatur petugas dari tombol di box kontrol dan tetap tersimpan walaupun listrik mati. Alat ini dibuat untuk dipakai sehari-hari, bukan sekadar prototipe, jadi semua modul disolder permanen.</p>
+      <div class="meta"><span class="mono">Sensor IR</span><span class="mono">Arduino Nano</span><span class="mono">DFPlayer Mini</span><span class="mono">Headphone per topik</span></div>
+      <div class="links">
+        <a href="museum-audio/">Buka simulasi 3D (interaktif) →</a>
+      </div>
+    </div>
+    <div class="titlestrip">
+      <div>Pemicu<b>Sensor InfraRed</b></div>
+      <div>Kontroler<b>Arduino Nano</b></div>
+      <div>Audio<b>DFPlayer Mini</b></div>
+      <div>Volume<b>Tersimpan di EEPROM</b></div>
+    </div>
+  </article>
+
+  <!-- TROMMEL MINIATUR -->
+  <article class="sheet">
+    <div class="draw" aria-hidden="true">
+      <svg viewBox="0 0 320 230">
+        <defs>
+          <pattern id="h5" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.3" class="ln-thin"/></pattern>
+          <pattern id="h8" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="2.4" class="ln-thin"/></pattern>
+        </defs>
+        <text class="svgt" x="6" y="12">TAMPAK SAMPING · SKALA 1:2</text>
+        <!-- hopper -->
+        <path class="ln" d="M24 44 H76 L64 86 H46 Z"/>
+        <text class="svgt" x="24" y="38">hopper</text>
+        <!-- drum, tilted 2 deg toward outlet -->
+        <g transform="rotate(2 160 100)">
+          <rect x="60" y="82" width="100" height="38" fill="url(#h5)"/>
+          <rect x="160" y="82" width="100" height="38" fill="url(#h8)"/>
+          <rect class="ln-acc" x="60" y="82" width="200" height="38"/>
+          <g class="ln"><line x1="60" y1="78" x2="60" y2="124"/><line x1="110" y1="78" x2="110" y2="124"/><line x1="160" y1="78" x2="160" y2="124"/><line x1="210" y1="78" x2="210" y2="124"/><line x1="260" y1="78" x2="260" y2="124"/></g>
+          <line class="ln-thin" x1="40" y1="101" x2="280" y2="101" stroke-dasharray="8 3 2 3"/>
+          <!-- outlet chute -->
+          <path class="ln" d="M260 104 L282 104 L292 140"/>
+        </g>
+        <!-- frame -->
+        <g class="ln"><line x1="80" y1="126" x2="80" y2="196"/><line x1="240" y1="132" x2="240" y2="196"/><line x1="16" y1="196" x2="304" y2="196"/></g>
+        <!-- fraction trays -->
+        <rect class="ln-thin" x="64" y="168" width="92" height="20"/>
+        <rect class="ln-thin" x="164" y="168" width="92" height="20"/>
+        <rect class="ln-thin" x="272" y="168" width="32" height="20"/>
+        <text class="svgt-b" x="110" y="182" text-anchor="middle">&lt; 5 mm</text>
+        <text class="svgt-b" x="210" y="182" text-anchor="middle">5–8 mm</text>
+        <text class="svgt-b" x="288" y="182" text-anchor="middle">&gt; 8</text>
+        <!-- slope note -->
+        <path class="dim" d="M200 66 L260 66 M200 66 L260 68.1"/>
+        <text class="svgt-b" x="230" y="61" text-anchor="middle">2°</text>
+        <!-- gear inset, end view 1:4 -->
+        <g transform="translate(150 34)">
+          <g class="spin-r" style="animation-duration:48s"><circle class="ln" r="22" stroke-dasharray="1.8 1.6"/><circle class="ln-thin" r="5"/><line class="ln-thin" x1="0" y1="-20" x2="0" y2="20"/></g>
+          <g transform="translate(30 0)"><g class="spin" style="animation-duration:12s"><circle class="ln-acc" r="7" stroke-dasharray="1.7 1.5"/><line class="ln-acc" x1="-5" y1="0" x2="5" y2="0"/></g></g>
+          <text class="svgt" x="40" y="-2">25T</text>
+          <text class="svgt" x="-12" y="-24">100T</text>
+        </g>
+        <!-- dimension -->
+        <g class="dim"><line x1="60" y1="212" x2="260" y2="212"/><line x1="60" y1="204" x2="60" y2="218"/><line x1="160" y1="204" x2="160" y2="218"/><line x1="260" y1="204" x2="260" y2="218"/></g>
+        <text class="svgt-b" x="110" y="226" text-anchor="middle">2 × 100 · Ø5</text>
+        <text class="svgt-b" x="210" y="226" text-anchor="middle">2 × 100 · Ø8</text>
+      </svg>
+    </div>
+    <div class="body">
+      <p class="label">Proyek sendiri · Model demonstrasi</p>
+      <h3>Trommel miniatur, pengayak putar 3 fraksi <span class="chip ok">Prototipe jadi</span></h3>
+      <p>Trommel adalah drum ayak berputar yang biasa dipakai di tambang dan pengolahan kompos. Saya buat versi mininya untuk memperlihatkan cara kerjanya di atas meja. Material masuk dari hopper, lalu drum yang miring 2° membawanya pelan-pelan ke arah outlet sambil terus berputar.</p>
+      <p>Dua segmen pertama berlubang Ø5 mm dan dua segmen berikutnya Ø8 mm. Hasilnya material terpisah jadi tiga ukuran: di bawah 5 mm, 5–8 mm, dan sisanya keluar di ujung. Semua komponen dicetak 3D, panelnya dari akrilik.</p>
+      <div class="meta"><span class="mono">617 × 197 × 297 mm</span><span class="mono">Drum Ø76 × 4 segmen</span><span class="mono">76 komponen</span><span class="mono">SolidWorks 2020</span></div>
+      <div class="links">
+        <a href="trommel-miniature/">Buka model 3D dan video uji →</a>
+      </div>
+    </div>
+    <div class="titlestrip">
+      <div>Penggerak<b>DC JGA25-370</b></div>
+      <div>Transmisi<b>Spur m1, 25T → 100T (1:4)</b></div>
+      <div>Material<b>Cetak 3D + akrilik</b></div>
+      <div>Status<b>Unit final, Mar 2025</b></div>
+    </div>
+  </article>
+
+  <!-- CV350 -->
+  <article class="sheet">
+    <div class="draw" aria-hidden="true">
+      <svg viewBox="0 0 320 170">
+        <text class="svgt" x="6" y="12">TAMPAK SAMPING · SKALA ±1:2</text>
+        <!-- belt -->
+        <path class="ln-acc" d="M76 61 L246 58 A12 12 0 0 1 246 82 L76 79 A9 9 0 0 1 76 61 Z"/>
+        <path class="ln-acc" d="M150 50 h24 m-6 -4 l6 4 l-6 4"/>
+        <!-- rollers -->
+        <g transform="translate(76 70)"><g class="spin" style="animation-duration:6s"><circle class="ln" r="7"/><line class="ln-thin" x1="-6" y1="0" x2="6" y2="0"/></g></g>
+        <g transform="translate(246 70)"><g class="spin" style="animation-duration:9s"><circle class="ln" r="10"/><line class="ln-thin" x1="-9" y1="0" x2="9" y2="0"/><circle class="fill-acc" r="2.5"/></g></g>
+        <text class="svgt" x="54" y="50">idler Ø32</text>
+        <text class="svgt" x="226" y="46">drive Ø45</text>
+        <!-- 2040 frame + legs -->
+        <rect class="ln" x="70" y="86" width="180" height="8"/>
+        <line class="ln-thin" x1="70" y1="90" x2="250" y2="90"/>
+        <g class="ln"><line x1="84" y1="94" x2="84" y2="114"/><line x1="236" y1="94" x2="236" y2="114"/></g>
+        <rect class="fill-acc" x="78" y="114" width="12" height="4"/>
+        <rect class="fill-acc" x="230" y="114" width="12" height="4"/>
+        <line class="ln" x1="20" y1="118" x2="304" y2="118"/>
+        <!-- control box -->
+        <rect class="ln" x="262" y="62" width="36" height="50"/>
+        <g class="ln-thin"><path d="M270 72 l3 -2 l3 2 v3 l-3 2 l-3 -2 z M280 72 l3 -2 l3 2 v3 l-3 2 l-3 -2 z M275 80 l3 -2 l3 2 v3 l-3 2 l-3 -2 z"/></g>
+        <circle class="ln-acc" cx="280" cy="98" r="5"/>
+        <text class="svgt" x="262" y="56">PWM + fan</text>
+        <!-- dimensions -->
+        <g class="dim"><line x1="76" y1="128" x2="246" y2="128"/><line x1="76" y1="122" x2="76" y2="134"/><line x1="246" y1="122" x2="246" y2="134"/></g>
+        <text class="svgt-b" x="161" y="142" text-anchor="middle">308 sumbu roller</text>
+        <g class="dim"><line x1="34" y1="60" x2="34" y2="118"/><line x1="28" y1="60" x2="40" y2="60"/></g>
+        <text class="svgt-b" x="26" y="92" text-anchor="middle" transform="rotate(-90 26 92)">85</text>
+        <text class="svgt" x="6" y="162">belt lebar 350 · loop 750 · rangka aluminium 2040</text>
+      </svg>
+    </div>
+    <div class="body">
+      <p class="label">Desain sendiri · Material handling</p>
+      <h3>CV350, mini belt conveyor <span class="chip ok">Desain sendiri</span></h3>
+      <p>Conveyor kecil yang ringkas untuk meja kerja, lini perakitan kecil, atau keluaran mesin. Rangkanya dari profil aluminium 2040 dan 2020, jadi mudah dirakit, diperpanjang, dan dipasangi braket tambahan. Tegangan belt diatur dari dudukan idler yang bisa digeser.</p>
+      <p>Penggeraknya motor power-window 12 V yang mudah dicari, dengan pengatur kecepatan PWM dan kipas di dalam kotak kontrol. Saat ini rancangan yang sama sedang saya kembangkan menjadi conveyor keluaran mesin potong label, dengan motor stepper dan kontroler ESP32.</p>
+      <div class="meta"><span class="mono">391 × 499 × 131 mm</span><span class="mono">Belt 350 mm</span><span class="mono">Bearing 6000 × 4</span><span class="mono">SolidWorks 2020</span></div>
+      <div class="links">
+        <a href="mini-conveyor-cv350/">Buka model 3D (interaktif) →</a>
+      </div>
+    </div>
+    <div class="titlestrip">
+      <div>Penggerak<b>Gearmotor DC 12 V</b></div>
+      <div>Kecepatan<b>PWM, ±12,5 m/menit maks.</b></div>
+      <div>Rangka<b>Aluminium 2040 / 2020</b></div>
+      <div>Status<b>Okt 2026</b></div>
+    </div>
+  </article>
+</section>
+
+<section id="cara-kerja">
+  <div class="sec-head">
+    <p class="label">Cara saya bekerja</p>
+    <h2>Gambar dulu, ngobrol, baru dipotong</h2>
+  </div>
+  <ol class="steps">
+    <li><span class="n">1</span><h3>Dengarkan ceritanya</h3><p>Saya tanya untuk apa mesin itu, siapa yang memakainya, dan berapa anggarannya. Kebutuhan yang belum jelas saya tulis sebagai asumsi, supaya bisa dikonfirmasi.</p></li>
+    <li><span class="n">2</span><h3>Konsep 3D yang bisa diputar</h3><p>Klien menerima tautan model 3D, bukan gambar diam. Lebih mudah menunjuk bagian yang kurang pas daripada menjelaskannya lewat chat.</p></li>
+    <li><span class="n">3</span><h3>Revisi bersama</h3><p>Bentuk yang pas jarang ketemu di gambar pertama. Saya menikmati proses revisi, karena tiap revisi membuat kita makin paham masalahnya.</p></li>
+    <li><span class="n">4</span><h3>Siap dibuat</h3><p>Hasil akhirnya file CAD, STEP, dan STL, ditambah hitungan biaya yang jujur. Tujuan saya, desainnya benar-benar bisa diproduksi dan dijual.</p></li>
+  </ol>
+</section>
+
+<section id="mengajar" class="teach">
+  <div class="prose">
+    <p class="label">Mengajar</p>
+    <blockquote>“Murid saya harus tahu mesin itu dibuat untuk siapa, bukan cuma cara merakitnya.”</blockquote>
+    <p>Di SMKS 2 Triple J saya mengajar jurusan Teknik Otomasi Industri, dan juga CAD dengan SolidWorks untuk jurusan Teknik Mesin Industri. Saya menyusun modul ajar Kurikulum Merdeka sendiri, dari asesmen diagnostik sampai pemetaan tujuan pembelajaran.</p>
+    <p>Lab kami sederhana, hanya Arduino, servo, dan komputer. Justru karena itu saya senang mencari cara supaya murid tetap bisa merasakan logika robot industri dengan alat yang ada.</p>
+  </div>
+  <ul class="subjects">
+    <li><span>Sistem Kendali Elektropneumatik &amp; Hidrolik</span><span>Fase F</span></li>
+    <li><span>Sistem Robot Industri</span><span>Kelas XII</span></li>
+    <li><span>Sistem Kontrol Industri</span><span>TOI</span></li>
+    <li><span>Sistem Kontrol Elektronik</span><span>TOI</span></li>
+    <li><span>Sistem Kontrol Elektromagnetik</span><span>TOI</span></li>
+    <li><span>Piranti Sensor &amp; Aktuator Industri</span><span>TOI</span></li>
+    <li><span>Gambar Teknik Mesin (SolidWorks)</span><span>TMI</span></li>
+    <li><span>Prakarya &amp; Kewirausahaan</span><span>TOI</span></li>
+  </ul>
+</section>
+
+<section id="bengkel">
+  <div class="sec-head">
+    <p class="label">Di bengkel rumah</p>
+    <h2>Yang saya kerjakan karena senang</h2>
+  </div>
+  <div class="prose">
+    <p>Di luar pekerjaan, saya suka membuat prototipe: mengonversi mobil dan sepeda menjadi kendaraan listrik, mencetak part dengan printer 3D, dan menggambar ulang diagram wiring industri menjadi ladder logic yang mudah dibaca murid. Kebanyakan berawal dari rasa penasaran “bisa nggak, ya?”, dan biasanya jawabannya bisa, setelah beberapa kali gagal.</p>
+  </div>
+</section>
+
+<div class="tb" id="kontak">
+  <div><span class="k">Mari ngobrol</span><span class="big">Punya ide mesin yang belum ada gambarnya?</span><span class="v" style="color:var(--muted)">Ceritakan saja dulu. Saya senang membantu mengubahnya jadi konsep 3D.</span></div>
+  <div><span class="k">Digambar oleh</span><span class="v">Lukman · omah3dns</span></div>
+  <div><span class="k">Hubungi</span><span class="v"><a href="https://github.com/lht-sky">github.com/lht-sky</a><!-- Tambahkan WhatsApp / email di sini, contoh: <br>WA 08xx-xxxx-xxxx --></span></div>
+  <div><span class="k">Rev · Tanggal</span><span class="v" style="font-family:var(--font-mono);font-size:.85rem">A · 07-10-2026</span></div>
+</div>
+
+</div>
+</body>
+</html>
