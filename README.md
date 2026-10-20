@@ -1,1 +1,0 @@
-# omah3dns
